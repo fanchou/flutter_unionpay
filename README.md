@@ -1,15 +1,10 @@
 # flutter_unionpay
 
-flutter unionPay
+银联刷卡和扫描支付插件
 
-## Getting Started
+## 功能
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- 用于调用银联设备的扫码功能
+- 用于调用银联设备的打印功能
+- 用于调用银联支付功能
 
