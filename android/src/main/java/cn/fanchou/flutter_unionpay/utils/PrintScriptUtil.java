@@ -1,6 +1,10 @@
 package cn.fanchou.flutter_unionpay.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
+
+import io.flutter.Log;
 
 public class PrintScriptUtil {
   private StringBuffer sBuffer = null;
@@ -59,7 +63,7 @@ public class PrintScriptUtil {
    * @param layout 位置：居左、居中、居右或偏移量，偏移量区间为0~384如120
    * @param txt    文本
    **/
-  public PrintScriptUtil addText(String layout, String txt) {
+  public PrintScriptUtil text(String layout, String txt) {
     return addContent("text", layout, txt);
   }
 
@@ -127,7 +131,7 @@ public class PrintScriptUtil {
    *
    * @param lines 行数
    **/
-  public PrintScriptUtil addFeedline(int lines) {
+  public PrintScriptUtil emptyLines(int lines) {
     this.sBuffer.append("*feedline ").append(lines).append("\n");
     return this;
   }
@@ -167,4 +171,165 @@ public class PrintScriptUtil {
     this.sBuffer.append(str);
     return this;
   }
+
+  /**
+   * 打印表格
+   * @param columnWidths 列的宽度
+   *  @param columnAligns  列的对齐方式
+   * @param columnTexts  列的内容
+   *
+   * @return*/
+  public PrintScriptUtil printTable(int[] columnWidths, String[] columnAligns, String[] columnTexts) {
+    if(columnWidths.length != columnTexts.length || columnWidths.length != columnAligns.length ){
+      Log.d("printError", "COLUMN_WIDTHS_ALIGNS_AND_TEXTS_NOT_MATCH");
+      return null;
+    }
+
+    int totalLen = 0;
+    for(int i=0; i<columnWidths.length; i++){
+      totalLen += columnWidths[i];
+    }
+
+    int maxLen = 384; // 58mm
+    if(totalLen > maxLen){
+      Log.d("printError","COLUNM_WIDTHS_TOO_LARGE" + totalLen);
+      return null;
+    }
+
+    List<List<String>> table = new ArrayList<List<String>>();
+
+    /**splits the column text to few rows and applies the alignment **/
+    int padding = 1;
+    for(int i=0; i< columnWidths.length; i++){
+      int width = columnWidths[i] - padding; //1 char padding
+      String text = String.copyValueOf(columnTexts[i].toCharArray());
+      List<ColumnSplitedString> splited = new ArrayList<ColumnSplitedString>();
+      int shorter = 0;
+      int counter = 0;
+      StringBuilder temp = new StringBuilder();
+      for(int c=0; c<text.length(); c++){
+        char ch = text.charAt(c);
+        int l = isChinese(ch) ? 2 : 1;
+        if (l==2){
+          shorter++;
+        }
+        temp.append(ch);
+
+        if(counter+l < width){
+          counter = counter + l;
+        }else{
+          splited.add(new ColumnSplitedString(shorter, temp.toString()));
+          temp = new StringBuilder();
+          counter=0;
+          shorter=0;
+        }
+      }
+      if(temp.length()>0) {
+        splited.add(new ColumnSplitedString(shorter, temp.toString()));
+      }
+      String align = columnAligns[i];
+
+      List<String> formated = new ArrayList<String>();
+      for(ColumnSplitedString s: splited){
+        StringBuilder empty = new StringBuilder();
+        for(int w=0; w<(width+padding-s.getShorter()); w++){
+          empty.append(" ");
+        }
+        int startIdx = 0;
+        String ss = s.getStr();
+        if(align.equals(ScriptConstant.CENTER) && ss.length()<(width-s.getShorter())){
+          startIdx = (width-s.getShorter()-ss.length())/2;
+          if(startIdx+ss.length()>width-s.getShorter()){
+            startIdx--;
+          }
+          if(startIdx<0){
+            startIdx=0;
+          }
+        }else if(align.equals(ScriptConstant.RIGHT) && ss.length()<(width-s.getShorter())){
+          startIdx =width - s.getShorter()-ss.length();
+        }
+        Log.d("printError","empty.replace("+startIdx+","+(startIdx+ss.length())+","+ss+")");
+        empty.replace(startIdx,startIdx+ss.length(),ss);
+        formated.add(empty.toString());
+      }
+      table.add(formated);
+    }
+
+    /**  try to find the max row count of the table **/
+    int maxRowCount = 0;
+    for(int i=0;i<table.size()/*column count*/;i++){
+      List<String> rows = table.get(i); // row data in current column
+      if(rows.size()>maxRowCount){maxRowCount = rows.size();}// try to find the max row count;
+    }
+
+    /** loop table again to fill the rows **/
+    StringBuilder[] rowsToPrint = new StringBuilder[maxRowCount];
+    for(int column=0;column<table.size()/*column count*/;column++){
+      List<String> rows = table.get(column); // row data in current column
+      for(int row=0;row<maxRowCount;row++){
+        if(rowsToPrint[row]==null){
+          rowsToPrint[row] = new StringBuilder();
+        }
+        if(row<rows.size()){
+          //got the row of this column
+          rowsToPrint[row].append(rows.get(row));
+        }else{
+          int w =columnWidths[column];
+          StringBuilder empty = new StringBuilder();
+          for(int i=0;i<w;i++){
+            empty.append(" ");
+          }
+          rowsToPrint[row].append(empty.toString());//Append spaces to ensure the format
+        }
+      }
+    }
+
+    /** loops the rows and print **/
+    for(int i=0;i<rowsToPrint.length;i++){
+      rowsToPrint[i].append("\n\r");//wrap line..
+      try {
+        text(columnAligns[i], rowsToPrint[i].toString());
+      }catch (Exception e){
+        e.printStackTrace();
+      }
+    }
+
+    return this;
+  }
+
+  private static class ColumnSplitedString{
+    private int shorter;
+    private String str;
+
+    public ColumnSplitedString(int shorter, String str) {
+      this.shorter = shorter;
+      this.str = str;
+    }
+
+    public int getShorter() {
+      return shorter;
+    }
+
+    public String getStr() {
+      return str;
+    }
+  }
+
+  // 根据Unicode编码完美的判断中文汉字和符号
+  private static boolean isChinese(char c) {
+    Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+    if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+      || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+      || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+      || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B
+      || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+      || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS
+      || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION) {
+      return true;
+    }
+    return false;
+  }
+
+
+
 }

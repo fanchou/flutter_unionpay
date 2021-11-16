@@ -1,11 +1,417 @@
 package cn.fanchou.flutter_unionpay.utils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.fanchou.flutter_unionpay.beans.order.CardListItem;
+import cn.fanchou.flutter_unionpay.beans.order.CouponPayInfosItem;
+import cn.fanchou.flutter_unionpay.beans.order.GoodsListItem;
+import cn.fanchou.flutter_unionpay.beans.order.OrderInfo;
+import cn.fanchou.flutter_unionpay.beans.order.PayChannelListItem;
+import cn.fanchou.flutter_unionpay.beans.order.RefundPayChannelListItem;
+
 public class PrintModels {
+
+  private static Map<String, String> channelType = new HashMap<>();
+  static {
+    channelType.put( "02", "微信支付(条码)");
+    channelType.put("03", "支付宝支付(条码)");
+    channelType.put("04", "鲜范实体卡");
+    channelType.put("05", "鲜范电子卡");
+    channelType.put("06", "现金或其他");
+    channelType.put("07", "微信小程序支付");
+    channelType.put("09", "储值支付");
+    channelType.put("10", "微信人脸支付");
+    channelType.put("11", "其他支付");
+  }
+
+  public static String format2(double value) {
+    BigDecimal bd = new BigDecimal(value);
+    bd = bd.setScale(2, RoundingMode.HALF_UP);
+    return bd.toString();
+  }
+
+
+  /**
+   * 订单打印
+   **/
+  public String orderInfo(Map printInfo) {
+    PrintScriptUtil printer = new PrintScriptUtil();
+    Map<String, String> logoImages = new HashMap<>();
+    // todo 这里需要转成base64，固定图片可以直接先转了，免得浪费计算资源
+    logoImages.put("BT", "assets/BT.jpg");
+    logoImages.put("HY", "assets/BT.jpg");
+    logoImages.put("MZCK", "assets/BT.jpg");
+    logoImages.put("HZ", "assets/BT.jpg");
+    boolean againBool = (boolean) printInfo.get("againBool");
+
+    // 解析json
+    String order = (String) printInfo.get("orderInfo");
+    JSONObject json = JSON.parseObject(order);
+    OrderInfo orderInfo = JSON.parseObject(json.toJSONString(), OrderInfo.class);
+
+    // 是否是领展，用于特殊处理打印
+    boolean isLinzhan = false;
+
+    int storeId = (int) printInfo.get("storeId");
+
+    isLinzhan = storeId == 74;
+
+    // 是否是黑钻店
+    boolean isHeizuan = false;
+
+    // 如果有新加的门店，加到这个里面就可以了
+    int[] heiZuanStore = {96};
+
+    if (Arrays.asList(heiZuanStore).contains(storeId)) {
+      isHeizuan = true;
+    }
+
+    String brandName;
+    String imagePath;
+
+    int orderType = orderInfo.getOrderType();
+
+    if (isHeizuan) {
+      brandName = orderInfo.getBrandList().get(0).getName();
+      imagePath = logoImages.get("HZ");
+    } else {
+      if (orderInfo.getBrandList().size() > 1 || orderInfo.getBrandList().size() == 0) {
+        brandName = "面包新语";
+        imagePath = logoImages.get("BT");
+      } else {
+        brandName = orderInfo.getBrandList().get(0).getName();
+        imagePath = logoImages.get(orderInfo.getBrandList().get(0).getNearbyStoreBrand());
+      }
+    }
+
+    List<GoodsListItem> goodList;
+    if (orderInfo.getTradeBillType() == 1) {
+      goodList = orderInfo.getOrderGoodsInfo().getGoodsList();
+    } else {
+       goodList = orderInfo.getRefundOrderInfo().getRefundOrderGoodsInfo().getGoodsList();
+    }
+
+    String orderId = orderInfo.getOrderId();
+
+    if (againBool) {
+      printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+        .text(ScriptConstant.LEFT, "重新打印")
+        .emptyLines(1);
+    }
+
+    // 打印logo
+    printer.setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+//      .addImage(ScriptConstant.CENTER, "180*105", imagePath)
+      .setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE,"8","6")
+      .text(ScriptConstant.CENTER, orderInfo.getTradeBillType() == 1 ? brandName + "-" + orderInfo.getStoreName() : "(退)" + brandName + "-" + orderInfo.getStoreName())
+      .emptyLines(1)
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+      .text(ScriptConstant.LEFT, "收银员：" + orderInfo.getOrderOperatorFullName());
+
+    if (orderInfo.getTradeBillType() == 1) {
+      printer.text(ScriptConstant.LEFT, "买单时间：" + orderInfo.getCreateTime());
+    } else {
+      printer.text(ScriptConstant.LEFT, "售后时间：" + orderInfo.getRefundOrderInfo().getRefundTime())
+        .text(ScriptConstant.LEFT, "原单号：" + orderInfo.getRefundOrderInfo().getOriginalOrderId());
+    }
+
+    printer.text(ScriptConstant.LEFT, "单号：" + orderId);
+
+    // 配送时间
+    if (orderInfo.getOrderSourceType() == 2 && orderInfo.getTradeBillType() == 1) {
+      if (againBool ? orderType == 4 : orderType == 3) {
+        printer.text(
+          ScriptConstant.LEFT,
+          "自提时间：" + orderInfo.getOrderSelfTakeInfo().getSelfTakeDate() + " " + orderInfo.getOrderSelfTakeInfo().getSelfTakeTimeInterval()
+        );
+      } else if (againBool ? orderType == 1 : orderType == 2) {
+        printer.text(ScriptConstant.LEFT, "配送时间：" + orderInfo.getOrderDeliveryInfo().getDeliveryDate() + " " + orderInfo.getOrderDeliveryInfo().getDeliveryTimeInterval());
+      }
+    }
+
+    printer.emptyLines(1);
+
+    if (orderInfo.getOrderSourceType() == 2 && orderInfo.getTradeBillType() == 1) {
+      if (againBool ? orderType == 4 : orderType == 3) {
+        printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "10","6");
+        printer.text(
+          ScriptConstant.CENTER,
+          "自提码：" + (orderInfo.getSeatNumber().equals("") ? orderInfo.getOrderSelfTakeInfo().getSelfTakeCode() : orderInfo.getSeatNumber())
+        );
+        if (!orderInfo.getOrderSelfTakeInfo().getRemark().equals("")) {
+          printer.emptyLines(1);
+          printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE);
+          printer.text(ScriptConstant.LEFT, "备注：" + orderInfo.getOrderSelfTakeInfo().getRemark());
+        }
+      } else if (againBool ? orderType == 1 : orderType == 2) {
+        printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE,"10","6");
+        printer.text(ScriptConstant.CENTER, "取货码：" + orderInfo.getOrderDeliveryInfo().getTakeCode());
+        printer.emptyLines(1);
+        printer.text(ScriptConstant.LARGE, orderInfo.getOrderDeliveryInfo().getFullAddress());
+        printer.emptyLines(1);
+        printer.text(ScriptConstant.LARGE, orderInfo.getOrderDeliveryInfo().getReceiverName() + " " + orderInfo.getOrderDeliveryInfo().getReceiverMobile().replaceAll("(\\d{3})\\d{4}(\\d{4})","$1****$2"));
+        if (!orderInfo.getOrderDeliveryInfo().getRemark().equals("")) {
+          printer.emptyLines(1);
+          printer.text(ScriptConstant.LEFT, "备注：" + orderInfo.getOrderDeliveryInfo().getRemark());
+        }
+
+      }
+    } else {
+      if (orderInfo.getOrderSelfTakeInfo() != null) {
+        printer.text(
+          ScriptConstant.CENTER,
+          "牌号：" + (orderInfo.getSeatNumber().equals("") ? orderInfo.getOrderSelfTakeInfo().getSelfTakeDate() : orderInfo.getSeatNumber())
+        );
+        printer.emptyLines(1);
+      }
+    }
+
+    printer.addLine();
+
+    printer.setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
+
+    // 打印商品列表表格
+    printer.printTable(new int[]{16,8,8}, new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT, ScriptConstant.RIGHT}, new String[]{"名称","数量","金额"});
+
+    // 循环打印商品
+    for (Object goodItem: goodList){
+      GoodsListItem item = (GoodsListItem) goodItem;
+      String goodsName;
+      if (item.getSkuNames().equals("")) {
+        goodsName = item.getGoodsName();
+      } else {
+        goodsName = item.getGoodsName() + "(" + item.getSkuNames() + ")";
+      }
+
+      printer.printTable(
+        new int[]{16,8,8},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT, ScriptConstant.RIGHT},
+        new String[]{
+          goodsName,
+          String.valueOf((item.getWeighingWeight() > 0.00) ? (orderInfo.getTradeBillType() == 1 ? item.getWeighingWeight() : '-' + item.getWeighingWeight()) : (orderInfo.getTradeBillType() == 1 ? item.getNum() : item.getNum() * -1)),
+          (item.getWeighingWeight() > 0.00) ? (orderInfo.getTradeBillType() == 1 ? format2(item.getSellPrice() * (item.getWeighingWeight() / item.getWeight()) - item.getPreferentialMoney()) : format2(item.getSellPrice() * (item.getWeighingWeight() * -1 / item.getWeight()))) : (orderInfo.getTradeBillType() == 1 ? format2(item.getSellPrice() * item.getNum() - item.getPreferentialMoney()) : format2(item.getSellPrice() * item.getNum() * -1))
+        }
+      );
+    }
+
+    printer.addLine();
+
+    printer.printTable(
+      new int[]{16,16},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+      new String[]{
+        "原总计：",
+        String.valueOf(orderInfo.getTradeBillType() == 1 ? orderInfo.getOrderMoney() : orderInfo.getOrderMoney() * -1)
+      }
+    );
+
+    printer.addLine();
+
+    String endString = "";
+    if(isHeizuan){
+      endString = orderInfo.getTradeBillType() == 1 ? "应付金额" : "应退金额";
+    }else{
+      endString = orderInfo.getTradeBillType() == 1 ? "实付金额" : "实退金额";
+    }
+
+    printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "10","6");
+    printer.printTable(
+      new int[]{12,12},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+      new String[]{
+        endString,
+        String.valueOf(orderInfo.getTradeBillType() == 1 ? orderInfo.getOrderMoney() : orderInfo.getOrderMoney() * -1)
+      }
+    );
+
+    printer.setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL);
+
+    printer.addLine();
+
+    printer.text(ScriptConstant.LEFT, orderInfo.getTradeBillType() == 1 ? "支付信息：" : "退款方式：");
+
+    if (orderInfo.getTradeBillType() == 1) {
+      printer.printTable(
+        new int[]{16, 16},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+        new String[]{
+          "总计：" + orderInfo.getOrderMoney(),
+          "包装费：" + orderInfo.getPackageMoney()
+        }
+      );
+
+      printer.printTable(
+        new int[]{16, 16},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+        new String[]{
+          "服务费：" + orderInfo.getServiceFee(),
+          "总优惠：" + orderInfo.getPreferentialMoney()
+        }
+      );
+
+      printer.printTable(
+        new int[]{16, 16},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+        new String[]{
+          "应付：" + orderInfo.getShouldPayMoney(),
+          "实付：" + orderInfo.getActualReceiveMoney()
+        }
+      );
+
+      printer.printTable(
+        new int[]{16, 16},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+        new String[]{
+          "微信：" + orderInfo.getOrderPayInfo().getWeixinBarPayTotal() + orderInfo.getOrderPayInfo().getWxFacePayTotal() + orderInfo.getOrderPayInfo().getMiniweixinPayTotal(),
+          "支付宝：" + orderInfo.getOrderPayInfo().getAliBarPayTotal()
+        }
+      );
+
+      printer.printTable(
+        new int[]{18, 14},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+        new String[]{
+          "现金:" + orderInfo.getOrderPayInfo().getCashReceiveMoney() + " 找零:" + orderInfo.getOrderPayInfo().getCashGiveBackMoney(),
+          "储值：" + orderInfo.getOrderPayInfo().getCzPayTotal()
+        }
+      );
+
+      // 鲜范卡
+      List<CardListItem> cardListItems = orderInfo.getOrderPayInfo().getCardList();
+      if (cardListItems.size() > 0) {
+        for (CardListItem card : cardListItems) {
+          printer.text(ScriptConstant.LEFT, "鲜范" + card.getClassifyType() + "卡：" + card.getTradeMoney());
+        }
+      }
+
+      // 其他卡支付
+      List<CouponPayInfosItem> couponPayInfosItems = orderInfo.getOrderPayInfo().getCouponPayInfos();
+      if (couponPayInfosItems.size() > 0) {
+        for (CouponPayInfosItem element : couponPayInfosItems) {
+          printer.text(ScriptConstant.LEFT, element.getName() + ": " + element.getMoney());
+        }
+      }
+
+      // 卡余额
+      List<PayChannelListItem> payChannelListItems = orderInfo.getOrderPayInfo().getPayChannelList();
+      if (payChannelListItems.size() > 0) {
+        List<Map> cardBalancedList = new ArrayList<>();
+        List<Double> xfBalance = new ArrayList<>();
+        List<Double> czBalance = new ArrayList<>();
+
+        for (PayChannelListItem channel : payChannelListItems) {
+          Map<String, java.io.Serializable> cardInfo = new HashMap<>();
+          if (channel.getChannelType().equals("04")) {
+            Double balance = Double.parseDouble(channel.getXfEntityCardBalance());
+            cardInfo.put("xfEntityCardBalance", balance);
+            cardInfo.put("xfEntityCardNo", channel.getXfEntityCardNo());
+            cardBalancedList.add(cardInfo);
+
+            // 返回等于当前卡号的列表
+            List<Map> snycBalances = new ArrayList<>();
+            for (Map item : cardBalancedList) {
+              if (item.containsValue(channel.getXfEntityCardNo())) {
+                snycBalances.add(item);
+              }
+            }
+
+            if (snycBalances.size() > 1) {
+              for (Map item : cardBalancedList) {
+                if (item.containsValue(channel.getXfEntityCardNo())) {
+                  cardBalancedList.remove(item);
+                }
+              }
+
+              // 按从大到小排序
+              Collections.sort(snycBalances, (p1, p2) -> p1.get("xfEntityCardBalance") == p2.get("xfEntityCardBalance") ? 0 : ((Double) p1.get("xfEntityCardBalance") < (Double) p2.get("xfEntityCardBalance") ? 1 : -1));
+              cardBalancedList.add(snycBalances.get(0));
+            }
+
+          }
+
+          if (channel.getChannelType().equals("05")) {
+            xfBalance.add(Double.parseDouble(channel.getXfBalance()));
+          }
+          if (channel.getChannelType().equals("09")) {
+            czBalance.add(Double.parseDouble(channel.getCzBalance()));
+          }
+        }
+
+        if (!cardBalancedList.isEmpty()) {
+          for (Map item : cardBalancedList) {
+            printer.text(ScriptConstant.LEFT, "卡号：" + item.get("xfEntityCardNo") + ", 余额：" + item.get("xfEntityCardBalance"));
+          }
+        }
+
+        if (xfBalance.size() > 0) {
+          printer.text(ScriptConstant.LEFT, "鲜范电子卡余额：" + Collections.min(xfBalance));
+        }
+
+        if (czBalance.size() > 0) {
+          printer.text(ScriptConstant.LEFT, "储值余额：" + Collections.min(czBalance));
+        }
+      }
+    }else{
+      // 这里是打印退款信息
+      // todo 这里需要进行空判断
+      List<RefundPayChannelListItem> refundPayChannelListItems = orderInfo.getRefundOrderInfo().getRefundOrderPayRefundInfo().getRefundPayChannelList();
+      for (RefundPayChannelListItem element: refundPayChannelListItems){
+        printer.text(ScriptConstant.LEFT,channelType.get(element.getChannelType()) + ": -" +element.getRefundMoney());
+      }
+    }
+
+
+    printer.emptyLines(1);
+
+    printer.text(ScriptConstant.LEFT,"感谢光临,关注鲜范在线下单，送货上门");
+
+    // 打印二维码
+    printer.setQrqodeSize(4);
+    printer.addQrcode(ScriptConstant.CENTER,"https://mp.weixin.qq.com/a/~~ijlvQrlK1O4~MQpoT5D1CIah18uDnFwvhQ~~");
+    printer.emptyLines(1);
+    if(orderInfo.getStatus() == 20 || orderInfo.getStatus() == 40) {
+      if(isLinzhan){
+        printer.text(ScriptConstant.CENTER, "账单编号：" + orderInfo.getStoreSequence());
+        printer.emptyLines(1);
+        printer.printTable(
+          new int[]{16,16},
+          new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+          new String[]{
+            "实付金额：" + orderInfo.getNetSalesMoney(),
+            "赠券：" + orderInfo.getGiftMoney()
+          }
+        );
+        printer.emptyLines(1);
+      }
+    }
+
+    printer.text(ScriptConstant.LEFT, "门店电话：" + orderInfo.getStorePhoneNo());
+    printer.text(ScriptConstant.LEFT, "门店地址：" + orderInfo.getStoreAddress());
+    printer.emptyLines(1);
+
+    String barcode = orderId.substring(orderId.length() - 12);
+
+    printer.addBarcode(ScriptConstant.CENTER, barcode);
+    printer.emptyLines(1);
+    printer.emptyLines(1);
+
+    return printer.getString();
+  }
+
+
 
   /**
    * 鲜范卡支付打印
@@ -15,41 +421,41 @@ public class PrintModels {
     PrintScriptUtil psu = new PrintScriptUtil();
     psu.setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
       .addImage(ScriptConstant.CENTER, "180*105",imageData)
-      .addText(ScriptConstant.LEFT,"消费结果: " + (printInfo.get("status").toString().equals("1") ? "支付成功" : "退款成功"))
+      .text(ScriptConstant.LEFT,"消费结果: " + (printInfo.get("status").toString().equals("1") ? "支付成功" : "退款成功"))
       .setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
-      .addText(ScriptConstant.LEFT,  (printInfo.get("status").toString().equals("1") ? "实付总额" : "退款总额") +": " +  printInfo.get("money").toString());
+      .text(ScriptConstant.LEFT,  (printInfo.get("status").toString().equals("1") ? "实付总额" : "退款总额") +": " +  printInfo.get("money").toString());
 
     if(printInfo.get("aCard") != null){
         psu.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "8", "6");
-        psu.addText("50", "A卡:" + printInfo.get("aCard").toString());
+        psu.text("50", "A卡:" + printInfo.get("aCard").toString());
     }
 
     if(printInfo.get("bCard") != null){
       psu.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "8", "6");
-      psu.addText("50", "B卡:" + printInfo.get("bCard").toString());
+      psu.text("50", "B卡:" + printInfo.get("bCard").toString());
     }
 
     if(printInfo.get("cCard") != null){
       psu.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "8", "6");
-      psu.addText("50", "C卡:" + printInfo.get("cCard").toString());
+      psu.text("50", "C卡:" + printInfo.get("cCard").toString());
     }
 
     if(printInfo.get("oCard") != null){
       psu.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "8", "6");
-      psu.addText("50", printInfo.get("classifyName").toString() + ":" + printInfo.get("oCard").toString());
+      psu.text("50", printInfo.get("classifyName").toString() + ":" + printInfo.get("oCard").toString());
     }
 
 
     psu.setNextFormat(ScriptConstant.SMALL, ScriptConstant.SMALL)
-      .addText(ScriptConstant.CENTER, "...............................................")
+      .text(ScriptConstant.CENTER, "...............................................")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
-      .addText(ScriptConstant.LEFT, "交易流水:" + printInfo.get("orderId"))
-      .addText(ScriptConstant.LEFT, "用户: " + printInfo.get("userName"))
-      .addText(ScriptConstant.LEFT, "消费时间：" + printInfo.get("orderTime"))
-      .addText(ScriptConstant.LEFT, "交易类型: " + printInfo.get("orderType"))
-      .addText(ScriptConstant.LEFT, "消费门店：" + printInfo.get("shopName"))
-      .addText(ScriptConstant.LEFT, "消费门店：" + printInfo.get("storeName"))
-      .addFeedline(3);
+      .text(ScriptConstant.LEFT, "交易流水:" + printInfo.get("orderId"))
+      .text(ScriptConstant.LEFT, "用户: " + printInfo.get("userName"))
+      .text(ScriptConstant.LEFT, "消费时间：" + printInfo.get("orderTime"))
+      .text(ScriptConstant.LEFT, "交易类型: " + printInfo.get("orderType"))
+      .text(ScriptConstant.LEFT, "消费门店：" + printInfo.get("shopName"))
+      .text(ScriptConstant.LEFT, "消费门店：" + printInfo.get("storeName"))
+      .emptyLines(3);
     return psu.getString();
   }
 
@@ -58,36 +464,35 @@ public class PrintModels {
    **/
   public String eCardPayList(Map printInfo) {
     List<Map> orderList = (List) printInfo.get("orderList");
-
     Date currentTime = new Date();
     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     String dateString = formatter.format(currentTime);
 
     PrintScriptUtil psu = new PrintScriptUtil();
     psu.setNextFormat(ScriptConstant.LARGE, ScriptConstant.NORMAL)
-      .addText(ScriptConstant.CENTER,"交易记录清单")
-      .addFeedline(1)
+      .text(ScriptConstant.CENTER,"交易记录清单")
+      .emptyLines(1)
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
-      .addText(ScriptConstant.LEFT, "查询时间: " +  dateString)
-      .addText(ScriptConstant.LEFT, "统计时间: " +  printInfo.get("startTime") + "至" + printInfo.get("endTime"))
-      .addText(ScriptConstant.LEFT, "商家: " +  printInfo.get("shopName"))
-      .addText(ScriptConstant.LEFT, "门店: " +  printInfo.get("storeName"))
-      .addText(ScriptConstant.LEFT, "终端号: " + "4565434543")
-      .addText(ScriptConstant.LEFT, "交易笔数: " + printInfo.get("totalElements"))
-      .addText(ScriptConstant.LEFT, "交易总额: " +  printInfo.get("totalMoney"))
+      .text(ScriptConstant.LEFT, "查询时间: " +  dateString)
+      .text(ScriptConstant.LEFT, "统计时间: " +  printInfo.get("startTime") + "至" + printInfo.get("endTime"))
+      .text(ScriptConstant.LEFT, "商家: " +  printInfo.get("shopName"))
+      .text(ScriptConstant.LEFT, "门店: " +  printInfo.get("storeName"))
+      .text(ScriptConstant.LEFT, "终端号: " + "4565434543")
+      .text(ScriptConstant.LEFT, "交易笔数: " + printInfo.get("totalElements"))
+      .text(ScriptConstant.LEFT, "交易总额: " +  printInfo.get("totalMoney"))
       .setNextFormat(ScriptConstant.SMALL, ScriptConstant.SMALL)
-      .addText(ScriptConstant.CENTER, "...............................................")
+      .text(ScriptConstant.CENTER, "...............................................")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
 
     // 这里循环打印交易列表
     for(int i=0; i< orderList.size(); i++){
-      psu.addText(ScriptConstant.LEFT, "消费时间：" + orderList.get(i).get("orderTime"))
-        .addText(ScriptConstant.LEFT, "交易状态: " + orderList.get(i).get("status"))
-        .addText(ScriptConstant.LEFT, "交易金额：" + orderList.get(i).get("orderMoney"))
-        .addText(ScriptConstant.LEFT, "交易单号:" + orderList.get(i).get("orderId"));
+      psu.text(ScriptConstant.LEFT, "消费时间：" + orderList.get(i).get("orderTime"))
+        .text(ScriptConstant.LEFT, "交易状态: " + orderList.get(i).get("status"))
+        .text(ScriptConstant.LEFT, "交易金额：" + orderList.get(i).get("orderMoney"))
+        .text(ScriptConstant.LEFT, "交易单号:" + orderList.get(i).get("orderId"));
     }
 
-    psu.addFeedline(3);
+    psu.emptyLines(3);
     return psu.getString();
   }
 
@@ -103,36 +508,33 @@ public class PrintModels {
 
     PrintScriptUtil psu = new PrintScriptUtil();
     psu.setNextFormat(ScriptConstant.LARGE, ScriptConstant.NORMAL)
-      .addText(ScriptConstant.CENTER,"交易记录汇总")
-      .addFeedline(1)
+      .text(ScriptConstant.CENTER,"交易记录汇总")
+      .emptyLines(1)
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
-      .addText(ScriptConstant.LEFT, "查询时间: " +  dateString)
-      .addText(ScriptConstant.LEFT, "统计时间: " +  printInfo.get("startTime") + "至" + printInfo.get("endTime"))
-      .addText(ScriptConstant.LEFT, "商家: " +  printInfo.get("shopName"))
-      .addText(ScriptConstant.LEFT, "门店: " +  printInfo.get("storeName"))
-      .addText(ScriptConstant.LEFT, "终端号: " + "4565434543")
+      .text(ScriptConstant.LEFT, "查询时间: " +  dateString)
+      .text(ScriptConstant.LEFT, "统计时间: " +  printInfo.get("startTime") + "至" + printInfo.get("endTime"))
+      .text(ScriptConstant.LEFT, "商家: " +  printInfo.get("shopName"))
+      .text(ScriptConstant.LEFT, "门店: " +  printInfo.get("storeName"))
+      .text(ScriptConstant.LEFT, "终端号: " + "4565434543")
       .setNextFormat(ScriptConstant.SMALL, ScriptConstant.SMALL)
-      .addText(ScriptConstant.CENTER, "...............................................")
+      .text(ScriptConstant.CENTER, "...............................................")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
-      .addText(ScriptConstant.LEFT, "交易成功: " + printInfo.get("successOrderTotalNums") + "笔")
-      .addText(ScriptConstant.LEFT, "交易总额: " +  printInfo.get("successOrderTotalMoney") + "元");
+      .text(ScriptConstant.LEFT, "交易成功: " + printInfo.get("successOrderTotalNums") + "笔")
+      .text(ScriptConstant.LEFT, "交易总额: " +  printInfo.get("successOrderTotalMoney") + "元");
 
     // 这里循环打印交易列表
     for(int i=0; i< cardList.size(); i++){
-      psu.addText(ScriptConstant.LEFT, cardList.get(i).get("name").toString() + ": " + cardList.get(i).get("totalMoney"));
+      psu.text(ScriptConstant.LEFT, cardList.get(i).get("name").toString() + ": " + cardList.get(i).get("totalMoney"));
     }
 
     psu.setNextFormat(ScriptConstant.SMALL, ScriptConstant.SMALL)
-      .addText(ScriptConstant.CENTER, "...............................................")
+      .text(ScriptConstant.CENTER, "...............................................")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
-      .addText(ScriptConstant.LEFT, "退款笔数: " + printInfo.get("backOrderTotalNums") + "笔")
-      .addText(ScriptConstant.LEFT, "退款金额: " + printInfo.get("backOrderTotalMoney") + "元");
+      .text(ScriptConstant.LEFT, "退款笔数: " + printInfo.get("backOrderTotalNums") + "笔")
+      .text(ScriptConstant.LEFT, "退款金额: " + printInfo.get("backOrderTotalMoney") + "元");
 
-    psu.addFeedline(3);
+    psu.emptyLines(3);
     return psu.getString();
   }
-
-
-
 
 }

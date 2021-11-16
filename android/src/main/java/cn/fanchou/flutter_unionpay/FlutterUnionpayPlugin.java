@@ -53,8 +53,12 @@ public class FlutterUnionpayPlugin implements FlutterPlugin, MethodCallHandler, 
     channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), unionPayChannel);
     mMessageChannel.setMessageHandler(this);
     channel.setMethodCallHandler(this);
+    try {
+      transData.put("appId", APPID); //appId
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
   }
-
 
 
   @Override
@@ -476,11 +480,6 @@ public class FlutterUnionpayPlugin implements FlutterPlugin, MethodCallHandler, 
     this.activity = binding.getActivity();
     unionPayDevice = new UnionPayDevice();
     unionPayDevice.setScannerChannel(mMessageChannel);
-    try {
-      transData.put("appId", APPID); //appId
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
   }
 
   @Override
