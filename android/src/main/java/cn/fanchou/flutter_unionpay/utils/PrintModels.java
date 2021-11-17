@@ -108,7 +108,7 @@ public class PrintModels {
 
     if (againBool) {
       printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
-        .text(ScriptConstant.LEFT, "重新打印")
+        .text(ScriptConstant.CENTER, "重新打印")
         .emptyLines(1);
     }
 
