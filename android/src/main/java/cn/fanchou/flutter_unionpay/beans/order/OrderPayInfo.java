@@ -15,46 +15,46 @@ public class OrderPayInfo{
 	private double cashReceiveMoney;
 
 	@JSONField(name="liShePayTotal")
-	private int liShePayTotal;
+	private double liShePayTotal;
 
 	@JSONField(name="aliBarPayTotal")
-	private int aliBarPayTotal;
+	private double aliBarPayTotal;
 
 	@JSONField(name="miniUserBarPayTotal")
-	private int miniUserBarPayTotal;
+	private double miniUserBarPayTotal;
 
 	@JSONField(name="cashGiveBackMoney")
 	private double cashGiveBackMoney;
 
 	@JSONField(name="xfEntityCardPayTotal")
-	private int xfEntityCardPayTotal;
+	private double xfEntityCardPayTotal;
 
 	@JSONField(name="cardList")
 	private List<CardListItem> cardList;
 
 	@JSONField(name="wxFacePayTotal")
-	private int wxFacePayTotal;
+	private double wxFacePayTotal;
 
 	@JSONField(name="miniweixinPayTotal")
-	private int miniweixinPayTotal;
+	private double miniweixinPayTotal;
 
 	@JSONField(name="payChannelList")
 	private List<PayChannelListItem> payChannelList;
 
 	@JSONField(name="weixinBarPayTotal")
-	private int weixinBarPayTotal;
+	private double weixinBarPayTotal;
 
 	@JSONField(name="couponPayTotal")
-	private int couponPayTotal;
+	private double couponPayTotal;
 
 	@JSONField(name="memberPoints")
 	private int memberPoints;
 
 	@JSONField(name="xfElectronCardPayTotal")
-	private int xfElectronCardPayTotal;
+	private double xfElectronCardPayTotal;
 
 	@JSONField(name="czPayTotal")
-	private int czPayTotal;
+	private double czPayTotal;
 
 	public void setCashPayTotal(double cashPayTotal){
 		this.cashPayTotal = cashPayTotal;
@@ -84,7 +84,7 @@ public class OrderPayInfo{
 		this.liShePayTotal = liShePayTotal;
 	}
 
-	public int getLiShePayTotal(){
+	public double getLiShePayTotal(){
 		return liShePayTotal;
 	}
 
@@ -92,7 +92,7 @@ public class OrderPayInfo{
 		this.aliBarPayTotal = aliBarPayTotal;
 	}
 
-	public int getAliBarPayTotal(){
+	public double getAliBarPayTotal(){
 		return aliBarPayTotal;
 	}
 
@@ -100,7 +100,7 @@ public class OrderPayInfo{
 		this.miniUserBarPayTotal = miniUserBarPayTotal;
 	}
 
-	public int getMiniUserBarPayTotal(){
+	public double getMiniUserBarPayTotal(){
 		return miniUserBarPayTotal;
 	}
 
@@ -116,7 +116,7 @@ public class OrderPayInfo{
 		this.xfEntityCardPayTotal = xfEntityCardPayTotal;
 	}
 
-	public int getXfEntityCardPayTotal(){
+	public double getXfEntityCardPayTotal(){
 		return xfEntityCardPayTotal;
 	}
 
@@ -132,7 +132,7 @@ public class OrderPayInfo{
 		this.wxFacePayTotal = wxFacePayTotal;
 	}
 
-	public int getWxFacePayTotal(){
+	public double getWxFacePayTotal(){
 		return wxFacePayTotal;
 	}
 
@@ -140,7 +140,7 @@ public class OrderPayInfo{
 		this.miniweixinPayTotal = miniweixinPayTotal;
 	}
 
-	public int getMiniweixinPayTotal(){
+	public double getMiniweixinPayTotal(){
 		return miniweixinPayTotal;
 	}
 
@@ -152,11 +152,11 @@ public class OrderPayInfo{
 		return payChannelList;
 	}
 
-	public void setWeixinBarPayTotal(int weixinBarPayTotal){
+	public void setWeixinBarPayTotal(double weixinBarPayTotal){
 		this.weixinBarPayTotal = weixinBarPayTotal;
 	}
 
-	public int getWeixinBarPayTotal(){
+	public double getWeixinBarPayTotal(){
 		return weixinBarPayTotal;
 	}
 
@@ -164,7 +164,7 @@ public class OrderPayInfo{
 		this.couponPayTotal = couponPayTotal;
 	}
 
-	public int getCouponPayTotal(){
+	public double getCouponPayTotal(){
 		return couponPayTotal;
 	}
 
@@ -180,7 +180,7 @@ public class OrderPayInfo{
 		this.xfElectronCardPayTotal = xfElectronCardPayTotal;
 	}
 
-	public int getXfElectronCardPayTotal(){
+	public double getXfElectronCardPayTotal(){
 		return xfElectronCardPayTotal;
 	}
 
@@ -188,7 +188,7 @@ public class OrderPayInfo{
 		this.czPayTotal = czPayTotal;
 	}
 
-	public int getCzPayTotal(){
+	public double getCzPayTotal(){
 		return czPayTotal;
 	}
 }
