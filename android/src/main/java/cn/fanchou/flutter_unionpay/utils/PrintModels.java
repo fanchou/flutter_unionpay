@@ -75,7 +75,7 @@ public class PrintModels {
     boolean isHeizuan = false;
 
     // TODO 黑钻店都加到这个里面，现在只加了96
-    if(Arrays.asList(96).contains(storeId)){
+    if(Arrays.asList(96,409).contains(storeId)){
       isHeizuan = true;
     }
 
