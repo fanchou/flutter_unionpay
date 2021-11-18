@@ -210,6 +210,9 @@ public class UnionPayDevice {
       case 4:
         text = model.orderInfo(printInfo);
         break;
+      case 5:
+        text = model.handingInfo(printInfo);
+        break;
       default:
         text = buildText();
     }

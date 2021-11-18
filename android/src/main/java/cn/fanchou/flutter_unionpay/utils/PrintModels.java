@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.fanchou.flutter_unionpay.beans.handing.CouponPayDetailsItem;
+import cn.fanchou.flutter_unionpay.beans.handing.HandingInfo;
 import cn.fanchou.flutter_unionpay.beans.order.CardListItem;
 import cn.fanchou.flutter_unionpay.beans.order.CouponPayInfosItem;
 import cn.fanchou.flutter_unionpay.beans.order.GoodsListItem;
@@ -432,6 +434,66 @@ public class PrintModels {
     printer.emptyLines(1);
 
     return printer.getString();
+  }
+
+
+  /**
+   * 交接班信息打印
+   **/
+
+  public String handingInfo(Map printInfo){
+    PrintScriptUtil printer = new PrintScriptUtil();
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    String time = sdf.format(new Date());
+
+    String order = (String) printInfo.get("handingInfo");
+    JSONObject json = JSON.parseObject(order);
+    HandingInfo handingInfo = JSON.parseObject(json.toJSONString(), HandingInfo.class);
+
+
+    printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "10", "6")
+      .text(ScriptConstant.CENTER, "交接班报表")
+      .emptyLines(1)
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+      .text(ScriptConstant.LEFT, handingInfo.getHandoverStartTime() + "-" + handingInfo.getHandoverEndTime())
+      .text(ScriptConstant.LEFT,"门店名称")
+      .text(ScriptConstant.LEFT, "收银员：")
+      .text(ScriptConstant.LEFT, "打印时间：" + time)
+      .addLine()
+      .text(ScriptConstant.LEFT, "账面现金：" + handingInfo.getCash().getIncome())
+      .text(ScriptConstant.LEFT, "现金收款金额：" + handingInfo.getCash().getTotal())
+      .text(ScriptConstant.LEFT, "找零金额：" + handingInfo.getCash().getChange())
+      .text(ScriptConstant.LEFT,"实缴现金：" + handingInfo.getCash().getRealCash())
+      .text(ScriptConstant.LEFT, "差异金额(账面现金-实缴现金)：" + format2(handingInfo.getCash().getIncome() - handingInfo.getCash().getRealCash()))
+      .emptyLines(1)
+      .text(ScriptConstant.LEFT,"储值总额：" + handingInfo.getDeposit().getTotal())
+      .text(ScriptConstant.LEFT, "使用微信储值：" + handingInfo.getDeposit().getWxPay())
+      .text(ScriptConstant.LEFT, "使用支付宝储值：" + handingInfo.getDeposit().getAliPay())
+      .text(ScriptConstant.LEFT, "使用现金储值：" + handingInfo.getDeposit().getCash())
+      .addLine();
+
+    List<CouponPayDetailsItem> couponPayDetailsItems = handingInfo.getTurnover().getCouponPayDetails();
+
+    // 其它支付信息
+    if(couponPayDetailsItems != null && couponPayDetailsItems.size() > 0){
+      for (CouponPayDetailsItem element: couponPayDetailsItems){
+        printer.text(ScriptConstant.LEFT, element.getPayChannelName() + "：" + format2(element.getIncome() - element.getRefund()));
+      }
+    }
+
+    printer.addLine()
+      .text(ScriptConstant.LEFT, "收入合计：" + handingInfo.getTurnover().getTotal())
+      .emptyLines(1);
+
+    // todo 打印优惠券
+    handingInfo.getCouponPreferential();
+
+
+
+
+    return  printer.getString();
+
   }
 
 
