@@ -7,11 +7,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +25,7 @@ import cn.fanchou.flutter_unionpay.beans.order.GoodsListItem;
 import cn.fanchou.flutter_unionpay.beans.order.OrderInfo;
 import cn.fanchou.flutter_unionpay.beans.order.PayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.order.RefundPayChannelListItem;
+import cn.fanchou.flutter_unionpay.beans.store.StoreInfo;
 
 public class PrintModels {
 
@@ -46,6 +47,67 @@ public class PrintModels {
     bd = bd.setScale(2, RoundingMode.HALF_UP);
     return bd.toString();
   }
+
+  // 设置打印头部
+  static Map<String, Object> _setPrintTitle(Map<String, Object> params, List<StoreInfo> storeList) throws ParseException {
+    Map<String, Object> title = new HashMap<>();
+
+    Date now = new Date();
+    Date yesterday = new Date(new Date().getTime()-24*60*60*1000);
+    Date sevenDay = new Date(new Date().getTime()-7*24*60*60*1000);
+    Date ThrDay = new Date(new Date().getTime()-30*24*60*60*1000);
+    SimpleDateFormat formatDate = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat formatDateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    final String timestamp = formatDateTime.format(new Date());
+
+    StringBuilder storeNames = new StringBuilder();
+    String dateRange = "";
+
+
+    Map<String, Object> dates = new HashMap<>();
+    {
+      dates.put( "today", formatDate.format(now));
+      dates.put("yesterday", formatDate.format(yesterday));
+      dates.put("7day", formatDate.format(sevenDay));
+      dates.put("30day", formatDate.format(ThrDay));
+    }
+
+
+    // 操作日期范围
+    if (params.get("timeType") != null && params.get("timeType") != "") {
+      String type = (String) params.get("timeType");
+      dateRange = (String) dates.get(type);
+    } else {
+      dateRange = String.valueOf((formatDate.parse((String) params.get("startTime")).getTime() - formatDate.parse((String) params.get("'endTime'")).getTime()) / 1000*3600*24);
+    }
+
+    for (StoreInfo item :storeList){
+      if(item.getName() != null){
+        if(storeList.size() > 1){
+          storeNames.append("{" + item.getName() + "},");
+        }else{
+          storeNames.append("{" + item.getName() + "}");
+        }
+      }
+    }
+
+
+    Log.d("PrintInfo","时间范围：" + dateRange);
+    Log.d("PrintInfo","'门店名称：" + storeNames);
+
+    // 操作员
+    title.put("fullName", "操作人");
+    // 时间范围
+    title.put("dateRange", dateRange);
+    // 门店名称集合
+    title.put("storeNames", storeNames.toString());
+    // 打印时间
+    title.put("timestamp", timestamp);
+
+    return title;
+  }
+
+
 
 
   /**
@@ -256,7 +318,7 @@ public class PrintModels {
       new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
       new String[]{
         endString,
-        String.valueOf(orderInfo.getTradeBillType() == 1 ? orderInfo.getOrderMoney() : orderInfo.getOrderMoney() * -1)
+        String.valueOf(orderInfo.getTradeBillType() == 1 ? orderInfo.getActualReceiveMoney() : orderInfo.getRefundOrderInfo().getRefundMoney() * -1)
       }
     );
 
@@ -489,11 +551,96 @@ public class PrintModels {
     // todo 打印优惠券
     handingInfo.getCouponPreferential();
 
-
-
-
     return  printer.getString();
 
+  }
+
+  /**
+   * 日结打印
+   **/
+
+  public String operateSumPrint(Map printInfo) throws ParseException {
+    PrintScriptUtil printer = new PrintScriptUtil();
+
+    Map<String, Object> params = (Map<String, Object>) printInfo.get("param");
+
+    // todo 这里需要做转化
+    List<StoreInfo> storeList = (List<StoreInfo>) printInfo.get("storeList");
+
+    List sumList = (List) printInfo.get("sumList");
+
+    // 标题
+    printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+      .text(ScriptConstant.LEFT, (params.get("queryByHour") != null ? "(实时)" : "") + "营业状况汇总")
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
+
+    Map<String, Object> printTitle = _setPrintTitle(params,storeList);
+
+    printer.printTable(
+      new int[]{8, 24},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "操作员：",
+        (String) printTitle.get("fullName")
+      }
+    );
+
+    printer.printTable(
+      new int[]{8, 24},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "打印时间：",
+        (String) printTitle.get("timestamp")
+      }
+    );
+
+    printer.printTable(
+      new int[]{8, 24},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "日期范围：",
+        (String) printTitle.get("dateRange")
+      }
+    );
+
+    printer.printTable(
+      new int[]{8, 24},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "门店名称：",
+        (String) printTitle.get("storeNames")
+      }
+    );
+
+    printer.addLine();
+
+    if(params.get("queryByHour") != null){
+      printer
+        .setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+        .text(ScriptConstant.LEFT, "临时数据，仅供参考，请勿用于结算。如需结算，请日结后打印今日数据！")
+        .addLine();
+    }
+
+    // 这里还需要转化一个类型
+    for (Object item: sumList){
+      printer.printTable(
+        new int[]{16, 16},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+        new String[]{
+          "门店名称：",
+          (String) printTitle.get("storeNames")
+        }
+      );
+    }
+
+
+
+
+
+
+
+
+    return printer.getString();
   }
 
 
