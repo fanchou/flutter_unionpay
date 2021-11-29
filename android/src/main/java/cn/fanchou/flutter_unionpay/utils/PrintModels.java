@@ -81,7 +81,7 @@ public class PrintModels {
       String type = (String) params.get("timeType");
       dateRange = (String) dates.get(type);
     } else {
-      dateRange = formatDate.parse((String) params.get("startTime"))+ "-" + formatDate.parse((String) params.get("'endTime'"));
+      dateRange = formatDate.format(formatDate.parse((String) params.get("startTime"))) + "-" + formatDate.format(formatDate.parse((String) params.get("'endTime'")));
     }
 
     for (StoreListItem item :storeList){
