@@ -19,13 +19,16 @@ import java.util.Map;
 
 import cn.fanchou.flutter_unionpay.beans.handing.CouponPayDetailsItem;
 import cn.fanchou.flutter_unionpay.beans.handing.HandingInfo;
+import cn.fanchou.flutter_unionpay.beans.handing.SumList;
 import cn.fanchou.flutter_unionpay.beans.order.CardListItem;
 import cn.fanchou.flutter_unionpay.beans.order.CouponPayInfosItem;
 import cn.fanchou.flutter_unionpay.beans.order.GoodsListItem;
 import cn.fanchou.flutter_unionpay.beans.order.OrderInfo;
 import cn.fanchou.flutter_unionpay.beans.order.PayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.order.RefundPayChannelListItem;
+import cn.fanchou.flutter_unionpay.beans.handing.PayInfo;
 import cn.fanchou.flutter_unionpay.beans.store.StoreInfo;
+import cn.fanchou.flutter_unionpay.beans.store.StoreList;
 
 public class PrintModels {
 
@@ -138,7 +141,7 @@ public class PrintModels {
     // 是否是黑钻店
     boolean isHeizuan = false;
 
-    // TODO 黑钻店都加到这个里面，现在只加了96
+    // TODO 黑钻店都加到这个里面
     if(Arrays.asList(96,409).contains(storeId)){
       isHeizuan = true;
     }
@@ -564,17 +567,25 @@ public class PrintModels {
 
     Map<String, Object> params = (Map<String, Object>) printInfo.get("param");
 
-    // todo 这里需要做转化
-    List<StoreInfo> storeList = (List<StoreInfo>) printInfo.get("storeList");
+    // 门店列表，传递时需要用json格式
+    String storeListStr = (String) printInfo.get("storeList");
+    JSONObject json = JSON.parseObject(storeListStr);
+    StoreList store = JSON.parseObject(json.toJSONString(), StoreList.class);
+    List<StoreInfo> storeList = store.getStoreList();
 
-    List sumList = (List) printInfo.get("sumList");
+    // 各项参数，传递时需要用json格式
+    String sumListStr = (String) printInfo.get("sumList");
+    JSONObject json1 = JSON.parseObject(sumListStr);
+    SumList sum = JSON.parseObject(json1.toJSONString(), SumList.class);
+    List<PayInfo> sumList = sum.getSumList();
+
 
     // 标题
     printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
       .text(ScriptConstant.LEFT, (params.get("queryByHour") != null ? "(实时)" : "") + "营业状况汇总")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
 
-    Map<String, Object> printTitle = _setPrintTitle(params,storeList);
+    Map<String, Object> printTitle = _setPrintTitle(params, (List<StoreInfo>) storeList);
 
     printer.printTable(
       new int[]{8, 24},
@@ -618,27 +629,33 @@ public class PrintModels {
       printer
         .setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
         .text(ScriptConstant.LEFT, "临时数据，仅供参考，请勿用于结算。如需结算，请日结后打印今日数据！")
+        .setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
         .addLine();
     }
 
-    // 这里还需要转化一个类型
-    for (Object item: sumList){
+    for (PayInfo item: sumList){
       printer.printTable(
-        new int[]{16, 16},
-        new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+        new int[]{12, 10, 10},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT, ScriptConstant.LEFT},
         new String[]{
-          "门店名称：",
-          (String) printTitle.get("storeNames")
+          item.getPayName(),
+          String.valueOf(item.getMoney()),
+          item.getRatio() != null ? item.getRatio() + "%" : ""
         }
       );
     }
 
+    printer.addLine();
 
+    if(params.get("queryByHour") != null){
+      printer
+        .setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+        .text(ScriptConstant.LEFT, "临时数据，仅供参考，请勿用于结算。如需结算，请日结后打印今日数据！")
+        .setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
+        .addLine();
+    }
 
-
-
-
-
+    printer.emptyLines(1);
 
     return printer.getString();
   }

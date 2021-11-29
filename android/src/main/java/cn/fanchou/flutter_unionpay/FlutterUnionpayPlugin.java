@@ -16,6 +16,7 @@ import com.ums.anypay.service.IOnTransEndListener;
 import com.ums.upos.sdk.exception.CallServiceException;
 import com.ums.upos.sdk.exception.SdkException;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -121,7 +122,11 @@ public class FlutterUnionpayPlugin implements FlutterPlugin, MethodCallHandler, 
         Log.d("print","打印数据");
         Map printInfo = (Map) call.argument("printInfo");
         int type = (int) call.argument("type");
-        unionPayDevice.startPrint(type, printInfo);
+        try {
+          unionPayDevice.startPrint(type, printInfo);
+        } catch (ParseException e) {
+          e.printStackTrace();
+        }
         break;
       default:
         result.notImplemented();

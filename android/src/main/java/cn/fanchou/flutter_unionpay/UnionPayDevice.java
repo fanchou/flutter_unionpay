@@ -19,6 +19,7 @@ import com.ums.upos.sdk.system.BaseSystemManager;
 import com.ums.upos.uapi.ServiceResult;
 import com.ums.upos.sdk.scanner.ScannerManager;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -192,7 +193,7 @@ public class UnionPayDevice {
   /**
    * 开始打印
    **/
-  public void startPrint(int type, Map printInfo) {
+  public void startPrint(int type, Map printInfo) throws ParseException {
     PrinterManager manage = new PrinterManager();
     PrintModels model = new PrintModels();
     String text;
@@ -212,6 +213,9 @@ public class UnionPayDevice {
         break;
       case 5:
         text = model.handingInfo(printInfo);
+        break;
+      case 6:
+        text = model.operateSumPrint(printInfo);
         break;
       default:
         text = buildText();
