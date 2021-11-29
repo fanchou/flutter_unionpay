@@ -81,7 +81,7 @@ public class PrintModels {
       String type = (String) params.get("timeType");
       dateRange = (String) dates.get(type);
     } else {
-      dateRange = String.valueOf((formatDate.parse((String) params.get("startTime")).getTime() - formatDate.parse((String) params.get("'endTime'")).getTime()) / 1000*3600*24);
+      dateRange = formatDate.parse((String) params.get("startTime"))+ "-" + formatDate.parse((String) params.get("'endTime'"));
     }
 
     for (StoreListItem item :storeList){
@@ -593,7 +593,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{10, 22},
+      new int[]{12, 20},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "打印时间：",
@@ -602,7 +602,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{10, 22},
+      new int[]{12, 20},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "日期范围：",
@@ -611,7 +611,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{10, 22},
+      new int[]{12, 20},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "门店名称：",
@@ -631,7 +631,7 @@ public class PrintModels {
 
     for (PayInfo item: sumList){
       printer.printTable(
-        new int[]{14, 10, 8},
+        new int[]{16, 10, 6},
         new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT, ScriptConstant.LEFT},
         new String[]{
           item.getPayName(),
