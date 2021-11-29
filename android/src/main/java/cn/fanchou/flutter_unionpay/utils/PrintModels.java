@@ -95,9 +95,6 @@ public class PrintModels {
     }
 
 
-    Log.d("PrintInfo","时间范围：" + dateRange);
-    Log.d("PrintInfo","'门店名称：" + storeNames);
-
     // 操作员
     title.put("fullName", "操作人");
     // 时间范围
@@ -581,7 +578,7 @@ public class PrintModels {
       .text(ScriptConstant.CENTER, (params.get("queryByHour") != null ? "(实时)" : "") + "营业状况汇总")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
 
-    Map<String, Object> printTitle = _setPrintTitle(params, (List<StoreListItem>) storeList);
+    Map<String, Object> printTitle = _setPrintTitle(params, storeList);
 
     printer.printTable(
       new int[]{10, 22},
