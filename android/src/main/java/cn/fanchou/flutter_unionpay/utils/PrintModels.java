@@ -77,11 +77,11 @@ public class PrintModels {
 
 
     // 操作日期范围
-    if (params.get("timeType") != "") {
+    if (!String.valueOf(params.get("timeType")).equals("")) {
       String type = (String) params.get("timeType");
       dateRange = (String) dates.get(type);
     } else {
-      dateRange = formatDate.format(formatDate.parse((String) params.get("startTime"))) + "-" + formatDate.format(formatDate.parse((String) params.get("'endTime'")));
+      dateRange = formatDate.format(formatDateTime.parse(String.valueOf(params.get("startTime"))).getTime()) + "-" + formatDate.format(formatDateTime.parse(String.valueOf(params.get("endTime"))).getTime());
     }
 
     for (StoreListItem item :storeList){
@@ -562,7 +562,10 @@ public class PrintModels {
   public String operateSumPrint(Map printInfo) throws ParseException {
     PrintScriptUtil printer = new PrintScriptUtil();
 
-    Map<String, Object> params = (Map<String, Object>) printInfo.get("param");
+    String paramStr = (String) printInfo.get("param");
+    JSONObject json = JSON.parseObject(paramStr);
+    Map<String, Object> params =  JSONObject.parseObject(json.toJSONString());
+
 
     // 门店列表，传递时需要用json格式
     String storeListStr = (String) printInfo.get("storeList");
