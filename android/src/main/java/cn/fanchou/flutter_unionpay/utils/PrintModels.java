@@ -593,7 +593,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{12, 20},
+      new int[]{10, 22},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "打印时间：",
@@ -602,7 +602,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{12, 20},
+      new int[]{10, 22},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "日期范围：",
@@ -611,7 +611,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{12, 20},
+      new int[]{10, 22},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "门店名称：",
@@ -631,7 +631,7 @@ public class PrintModels {
 
     for (PayInfo item: sumList){
       printer.printTable(
-        new int[]{16, 10, 6},
+        new int[]{16, 9, 7},
         new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT, ScriptConstant.LEFT},
         new String[]{
           item.getPayName(),
