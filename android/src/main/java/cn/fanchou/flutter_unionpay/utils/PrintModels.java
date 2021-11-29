@@ -77,7 +77,7 @@ public class PrintModels {
 
 
     // 操作日期范围
-    if (params.get("timeType") != null && params.get("timeType") != "") {
+    if (params.get("timeType") != "") {
       String type = (String) params.get("timeType");
       dateRange = (String) dates.get(type);
     } else {
