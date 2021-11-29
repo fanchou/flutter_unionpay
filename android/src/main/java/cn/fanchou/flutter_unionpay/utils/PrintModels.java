@@ -70,9 +70,9 @@ public class PrintModels {
     Map<String, Object> dates = new HashMap<>();
     {
       dates.put( "today", formatDate.format(now));
-      dates.put("yesterday", formatDate.format(yesterday));
-      dates.put("7day", formatDate.format(sevenDay));
-      dates.put("30day", formatDate.format(ThrDay));
+      dates.put("yesterday", formatDate.format(yesterday) + "-" + formatDate.format(now));
+      dates.put("7day", formatDate.format(sevenDay) +  "-" + formatDate.format(now));
+      dates.put("30day", formatDate.format(ThrDay)  + "-" + formatDate.format(now));
     }
 
 
