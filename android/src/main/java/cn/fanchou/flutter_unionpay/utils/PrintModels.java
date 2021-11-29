@@ -27,8 +27,8 @@ import cn.fanchou.flutter_unionpay.beans.order.OrderInfo;
 import cn.fanchou.flutter_unionpay.beans.order.PayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.order.RefundPayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.handing.PayInfo;
-import cn.fanchou.flutter_unionpay.beans.store.StoreInfo;
 import cn.fanchou.flutter_unionpay.beans.store.StoreList;
+import cn.fanchou.flutter_unionpay.beans.store.StoreListItem;
 
 public class PrintModels {
 
@@ -52,7 +52,7 @@ public class PrintModels {
   }
 
   // 设置打印头部
-  static Map<String, Object> _setPrintTitle(Map<String, Object> params, List<StoreInfo> storeList) throws ParseException {
+  static Map<String, Object> _setPrintTitle(Map<String, Object> params, List<StoreListItem> storeList) throws ParseException {
     Map<String, Object> title = new HashMap<>();
 
     Date now = new Date();
@@ -84,12 +84,12 @@ public class PrintModels {
       dateRange = String.valueOf((formatDate.parse((String) params.get("startTime")).getTime() - formatDate.parse((String) params.get("'endTime'")).getTime()) / 1000*3600*24);
     }
 
-    for (StoreInfo item :storeList){
+    for (StoreListItem item :storeList){
       if(item.getName() != null){
         if(storeList.size() > 1){
-          storeNames.append("{" + item.getName() + "},");
+          storeNames.append(item.getName() + ",");
         }else{
-          storeNames.append("{" + item.getName() + "}");
+          storeNames.append(item.getName());
         }
       }
     }
@@ -569,26 +569,22 @@ public class PrintModels {
 
     // 门店列表，传递时需要用json格式
     String storeListStr = (String) printInfo.get("storeList");
-    JSONObject json = JSON.parseObject(storeListStr);
-    StoreList store = JSON.parseObject(json.toJSONString(), StoreList.class);
-    List<StoreInfo> storeList = store.getStoreList();
+    List<StoreListItem> storeList = JSON.parseArray(storeListStr, StoreListItem.class);
 
     // 各项参数，传递时需要用json格式
     String sumListStr = (String) printInfo.get("sumList");
-    JSONObject json1 = JSON.parseObject(sumListStr);
-    SumList sum = JSON.parseObject(json1.toJSONString(), SumList.class);
-    List<PayInfo> sumList = sum.getSumList();
+    List<PayInfo> sumList = JSON.parseArray(sumListStr, PayInfo.class);
 
 
     // 标题
     printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
-      .text(ScriptConstant.LEFT, (params.get("queryByHour") != null ? "(实时)" : "") + "营业状况汇总")
+      .text(ScriptConstant.CENTER, (params.get("queryByHour") != null ? "(实时)" : "") + "营业状况汇总")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
 
-    Map<String, Object> printTitle = _setPrintTitle(params, (List<StoreInfo>) storeList);
+    Map<String, Object> printTitle = _setPrintTitle(params, (List<StoreListItem>) storeList);
 
     printer.printTable(
-      new int[]{8, 24},
+      new int[]{10, 22},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "操作员：",
@@ -597,7 +593,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{8, 24},
+      new int[]{10, 22},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "打印时间：",
@@ -606,7 +602,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{8, 24},
+      new int[]{10, 22},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "日期范围：",
@@ -615,7 +611,7 @@ public class PrintModels {
     );
 
     printer.printTable(
-      new int[]{8, 24},
+      new int[]{10, 22},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "门店名称：",
@@ -635,7 +631,7 @@ public class PrintModels {
 
     for (PayInfo item: sumList){
       printer.printTable(
-        new int[]{12, 10, 10},
+        new int[]{14, 10, 8},
         new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT, ScriptConstant.LEFT},
         new String[]{
           item.getPayName(),
