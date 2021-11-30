@@ -220,6 +220,9 @@ public class UnionPayDevice {
       case 7:
         text = model.goodsStatisPrint(printInfo);
         break;
+      case 8:
+        text = model.goodsDamagePrint(printInfo);
+        break;
       default:
         text = buildText();
     }
