@@ -900,7 +900,7 @@ public class PrintModels {
         }
 
         printer.printTable(
-          new int[]{8, 8, 5, 4, 7},
+          new int[]{9, 8, 4, 4, 7},
           new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
           new String[]{
             goods.getDamageReason(),
