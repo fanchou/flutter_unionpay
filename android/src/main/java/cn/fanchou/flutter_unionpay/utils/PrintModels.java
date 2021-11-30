@@ -768,8 +768,9 @@ public class PrintModels {
               format2(goods.getPercentage())
             }
           );
-          printer.addLine();
         }
+
+        printer.addLine();
 
         // 打印汇总
         double totalPercentage = 0.00;
