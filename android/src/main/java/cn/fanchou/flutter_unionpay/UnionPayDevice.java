@@ -217,6 +217,9 @@ public class UnionPayDevice {
       case 6:
         text = model.operateSumPrint(printInfo);
         break;
+      case 7:
+        text = model.goodsStatisPrint(printInfo);
+        break;
       default:
         text = buildText();
     }

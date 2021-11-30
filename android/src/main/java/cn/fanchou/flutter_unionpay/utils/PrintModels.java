@@ -19,7 +19,6 @@ import java.util.Map;
 
 import cn.fanchou.flutter_unionpay.beans.handing.CouponPayDetailsItem;
 import cn.fanchou.flutter_unionpay.beans.handing.HandingInfo;
-import cn.fanchou.flutter_unionpay.beans.handing.SumList;
 import cn.fanchou.flutter_unionpay.beans.order.CardListItem;
 import cn.fanchou.flutter_unionpay.beans.order.CouponPayInfosItem;
 import cn.fanchou.flutter_unionpay.beans.order.GoodsListItem;
@@ -27,8 +26,9 @@ import cn.fanchou.flutter_unionpay.beans.order.OrderInfo;
 import cn.fanchou.flutter_unionpay.beans.order.PayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.order.RefundPayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.handing.PayInfo;
-import cn.fanchou.flutter_unionpay.beans.store.StoreList;
 import cn.fanchou.flutter_unionpay.beans.store.StoreListItem;
+import cn.fanchou.flutter_unionpay.beans.summary.GoodsDetails;
+import cn.fanchou.flutter_unionpay.beans.summary.SummaryGoodsInfoItem;
 
 public class PrintModels {
 
@@ -93,7 +93,6 @@ public class PrintModels {
         }
       }
     }
-
 
     // 操作员
     title.put("fullName", "操作人");
@@ -654,6 +653,141 @@ public class PrintModels {
     printer.emptyLines(1);
 
     return printer.getString();
+  }
+
+  // 商品销售
+  public String goodsStatisPrint(Map printInfo) throws ParseException {
+    PrintScriptUtil printer = new PrintScriptUtil();
+
+    // 通用参数
+    String paramStr = (String) printInfo.get("param");
+    JSONObject json = JSON.parseObject(paramStr);
+    Map<String, Object> params =  JSONObject.parseObject(json.toJSONString());
+
+
+    // 门店列表
+    String storeListStr = (String) printInfo.get("storeList");
+    List<StoreListItem> storeList = JSON.parseArray(storeListStr, StoreListItem.class);
+
+    // 门店商品列表
+    String goodsListStr = (String) printInfo.get("goodList");
+    List<SummaryGoodsInfoItem> goodsList = JSON.parseArray(goodsListStr,SummaryGoodsInfoItem.class);
+
+    // 标题
+    printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+      .text(ScriptConstant.CENTER,"商品销售报表")
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
+
+    Map<String, Object> printTitle = _setPrintTitle(params, storeList);
+
+    printer.printTable(
+      new int[]{10, 22},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "操作员：",
+        (String) printTitle.get("fullName")
+      }
+    );
+
+    printer.printTable(
+      new int[]{10, 22},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "打印时间：",
+        (String) printTitle.get("timestamp")
+      }
+    );
+
+    printer.printTable(
+      new int[]{10, 22},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "日期范围：",
+        (String) printTitle.get("dateRange")
+      }
+    );
+
+    printer.printTable(
+      new int[]{10, 22},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "门店名称：",
+        (String) printTitle.get("storeNames")
+      }
+    );
+
+    for (int index = 0;index<goodsList.size();index++){
+      SummaryGoodsInfoItem item = goodsList.get(index);
+      if(item.getGoodsDetails() != null){
+        printer.addLine();
+        if(index == 0){
+          printer.printTable(
+            new int[]{14, 4, 8, 6},
+            new String[]{ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
+            new String[]{
+              "商品名称",
+              "数量",
+              "金额",
+              "占比"
+            }
+          );
+        }
+
+        for (GoodsDetails goods:item.getGoodsDetails()){
+          double percentage = 0.00;
+          if (goods.getPercentage() > 0) {
+            percentage = Double.parseDouble(format2(goods.getPercentage() * 100));
+          }
+          String goodsName = "";
+          if (goods.getGoodsShortName() != null && !goods.getGoodsShortName().equals("")) {
+            goodsName += goods.getGoodsShortName();
+          } else {
+            goodsName += goods.getGoodsName() == null ? "" : goods.getGoodsName();
+          }
+
+          if (!goods.getSkuNames().equals("") && goods.getSkuNames() != null) {
+            goodsName += "|" + goods.getSkuNames();
+          }
+          String subName = "";
+
+          if (!goodsName.equals("")) {
+            subName = goodsName.length() >= 9 ? goodsName.substring(0, 9) : goodsName;
+          }
+
+          printer.printTable(
+            new int[]{14, 4, 8, 6},
+            new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
+            new String[]{
+              subName,
+              String.valueOf(goods.getNum()),
+              String.valueOf(goods.getTotal()),
+              format2(goods.getPercentage())
+            }
+          );
+
+          printer.addLine();
+
+          double totalPercentage = 0.00;
+          if (item.getPercentage() > 0) {
+            totalPercentage = Double.parseDouble(format2(item.getPercentage() * 100));
+          }
+
+          printer.printTable(
+            new int[]{10, 8, 8, 6},
+            new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
+            new String[]{
+              item.getCatalogName(),
+              String.valueOf(item.getGoodSalesNum()),
+              String.valueOf(item.getCatalogTotal()),
+              format2(totalPercentage)
+            }
+          );
+          printer.emptyLines(1);
+        }
+      }
+    }
+
+    return  printer.getString();
   }
 
 
