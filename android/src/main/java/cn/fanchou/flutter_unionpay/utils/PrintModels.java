@@ -860,13 +860,13 @@ public class PrintModels {
     double totalNum = 0.0;
     double totalPrice = 0.0;
 
-    for (int index = 0; index<damageGoodsList.size();index++){
+    for (int index = 0; index<damageGoodsList.size(); index++){
       DamageGoodsListItem item = damageGoodsList.get(index);
       printer.addLine();
       if(index == 0){
         printer.printTable(
           new int[]{8, 8, 5, 5, 6},
-          new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
+          new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER,ScriptConstant.CENTER},
           new String[]{
             "报废原因",
             "报废商品",
@@ -900,7 +900,7 @@ public class PrintModels {
         }
 
         printer.printTable(
-          new int[]{8, 8, 5, 5, 6},
+          new int[]{8, 8, 5, 4, 7},
           new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
           new String[]{
             goods.getDamageReason(),
@@ -938,7 +938,7 @@ public class PrintModels {
     printer.addLine();
 
     printer.printTable(
-      new int[]{12, 10, 10},
+      new int[]{10, 10, 12},
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "报损总计：",
