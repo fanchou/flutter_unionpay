@@ -671,6 +671,9 @@ public class PrintModels {
 
     // 门店商品列表
     String goodsListStr = (String) printInfo.get("goodList");
+
+    Log.d("商品打印信息：", goodsListStr);
+
     List<SummaryGoodsInfoItem> goodsList = JSON.parseArray(goodsListStr,SummaryGoodsInfoItem.class);
 
     // 标题
@@ -716,14 +719,14 @@ public class PrintModels {
       }
     );
 
-    for (int index = 0;index<goodsList.size();index++){
+    for (int index = 0; index<goodsList.size();index++){
       SummaryGoodsInfoItem item = goodsList.get(index);
       if(item.getGoodsDetails() != null){
         printer.addLine();
         if(index == 0){
           printer.printTable(
             new int[]{14, 4, 8, 6},
-            new String[]{ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
+            new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
             new String[]{
               "商品名称",
               "数量",
@@ -733,6 +736,7 @@ public class PrintModels {
           );
         }
 
+        // 商品列表
         for (GoodsDetails goods:item.getGoodsDetails()){
           double percentage = 0.00;
           if (goods.getPercentage() > 0) {
@@ -764,26 +768,26 @@ public class PrintModels {
               format2(goods.getPercentage())
             }
           );
-
           printer.addLine();
-
-          double totalPercentage = 0.00;
-          if (item.getPercentage() > 0) {
-            totalPercentage = Double.parseDouble(format2(item.getPercentage() * 100));
-          }
-
-          printer.printTable(
-            new int[]{10, 8, 8, 6},
-            new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
-            new String[]{
-              item.getCatalogName(),
-              String.valueOf(item.getGoodSalesNum()),
-              String.valueOf(item.getCatalogTotal()),
-              format2(totalPercentage)
-            }
-          );
-          printer.emptyLines(1);
         }
+
+        // 打印汇总
+        double totalPercentage = 0.00;
+        if (item.getPercentage() > 0) {
+          totalPercentage = Double.parseDouble(format2(item.getPercentage() * 100));
+        }
+
+        printer.printTable(
+          new int[]{10, 8, 8, 6},
+          new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.CENTER, ScriptConstant.CENTER},
+          new String[]{
+            item.getCatalogName(),
+            String.valueOf(item.getGoodSalesNum()),
+            String.valueOf(item.getCatalogTotal()),
+            format2(totalPercentage)
+          }
+        );
+        printer.emptyLines(1);
       }
     }
 
