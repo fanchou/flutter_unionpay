@@ -765,7 +765,7 @@ public class PrintModels {
               subName,
               String.valueOf(goods.getNum()),
               String.valueOf(goods.getTotal()),
-              format2(goods.getPercentage())
+              format2(percentage) + "%"
             }
           );
         }
@@ -785,7 +785,7 @@ public class PrintModels {
             item.getCatalogName(),
             String.valueOf(item.getGoodSalesNum()),
             String.valueOf(item.getCatalogTotal()),
-            format2(totalPercentage)
+            format2(totalPercentage) + "%"
           }
         );
         printer.emptyLines(1);
