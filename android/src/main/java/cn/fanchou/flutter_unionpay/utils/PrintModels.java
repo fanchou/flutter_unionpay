@@ -557,6 +557,31 @@ public class PrintModels {
   }
 
   /**
+   * 交接班打印日结单
+   **/
+
+  public String printDateCashierInfo(Map printInfo) {
+    PrintScriptUtil printer = new PrintScriptUtil();
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    String time = sdf.format(new Date());
+    String data = dateFormat.format(new Date());
+
+    printer
+      .setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+      .text(ScriptConstant.CENTER, "日结统计")
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
+
+
+
+    return printer.getString();
+  }
+
+
+
+
+  /**
    * 日结打印
    **/
 
@@ -946,10 +971,6 @@ public class PrintModels {
        "价格: " + totalPrice,
       }
     );
-
-
-
-
 
     return  printer.getString();
   }
