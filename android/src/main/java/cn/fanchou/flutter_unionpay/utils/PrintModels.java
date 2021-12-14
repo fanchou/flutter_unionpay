@@ -573,8 +573,6 @@ public class PrintModels {
       .text(ScriptConstant.CENTER, "日结统计")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
 
-
-
     return printer.getString();
   }
 

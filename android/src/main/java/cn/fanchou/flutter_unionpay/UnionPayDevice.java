@@ -107,7 +107,13 @@ public class UnionPayDevice {
    * 关闭摄像头
    */
   public void stopScan() throws SdkException, CallServiceException {
-    scannerManager.stopScan();
+    try {
+      if (scannerManager != null){
+        scannerManager.stopScan();
+      }
+    }catch (SdkException | CallServiceException e) {
+      e.printStackTrace();
+    }
   }
 
   /**

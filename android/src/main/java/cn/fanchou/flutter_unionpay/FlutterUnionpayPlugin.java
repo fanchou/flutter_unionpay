@@ -500,7 +500,9 @@ public class FlutterUnionpayPlugin implements FlutterPlugin, MethodCallHandler, 
   @Override
   public void onDetachedFromActivity() {
     try {
-      unionPayDevice.stopScan();
+      if(unionPayDevice != null){
+        unionPayDevice.stopScan();
+      }
     } catch (SdkException | CallServiceException e) {
       e.printStackTrace();
     }
