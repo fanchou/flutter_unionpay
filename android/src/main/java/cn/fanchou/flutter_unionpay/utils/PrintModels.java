@@ -134,13 +134,13 @@ public class PrintModels {
 
     int storeId = (int) printInfo.get("storeId");
 
-    isLinzhan = storeId == 74;
+    isLinzhan = (storeId == 74 || storeId == 57);
 
     // 是否是黑钻店
     boolean isHeizuan = false;
 
     // TODO 黑钻店都加到这个里面
-    if(Arrays.asList(96,409).contains(storeId)){
+    if(Arrays.asList(96,409,70,73).contains(storeId)){
       isHeizuan = true;
     }
 
