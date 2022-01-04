@@ -34,7 +34,7 @@ import cn.fanchou.flutter_unionpay.beans.summary.SummaryGoodsInfoItem;
 
 public class PrintModels {
 
-  private static Map<String, String> channelType = new HashMap<>();
+  private static final Map<String, String> channelType = new HashMap<>();
   static {
     channelType.put( "02", "微信支付(条码)");
     channelType.put("03", "支付宝支付(条码)");
