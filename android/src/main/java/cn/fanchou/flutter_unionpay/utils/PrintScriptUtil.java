@@ -112,8 +112,8 @@ public class PrintScriptUtil {
       text("l","--------------------------------");
     }else{
       this.sBuffer.append("*line ").append("\n");
-      return this;
     }
+    return this;
   }
 
   /**
