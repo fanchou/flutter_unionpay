@@ -346,6 +346,7 @@ public class PrintScriptUtil {
      boolean isX970Device = false;
      try {
        Map<String, String> deviceInfo = BaseSystemManager.getInstance().getDeviceInfo();
+       Log.d("printer======>", deviceInfo.toString());
        if ((deviceInfo.get(ModuleEnum.VENDOR).equals("VERIFONE")
          || deviceInfo.get(ModuleEnum.MODEL).equals("X970")
          || deviceInfo.get(ModuleEnum.MODEL).equals("X990"))
