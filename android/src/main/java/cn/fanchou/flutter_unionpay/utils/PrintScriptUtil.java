@@ -109,11 +109,11 @@ public class PrintScriptUtil {
    **/
   public PrintScriptUtil addLine() {
     if(isX970()){
-      this.sBuffer.append("--------------------------------");
+      text("l","--------------------------------");
     }else{
       this.sBuffer.append("*line ").append("\n");
+      return this;
     }
-    return this;
   }
 
   /**
