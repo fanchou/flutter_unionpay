@@ -1,11 +1,8 @@
 package cn.fanchou.flutter_unionpay.utils;
 
-import com.ums.upos.sdk.exception.CallServiceException;
-import com.ums.upos.sdk.exception.SdkException;
 import com.ums.upos.sdk.system.BaseSystemManager;
 import com.ums.upos.sdk.system.ModuleEnum;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +140,7 @@ public class PrintScriptUtil {
    * @param lines 行数
    **/
   public PrintScriptUtil emptyLines(int lines) {
-    this.sBuffer.append("*feedline ").append(lines);
+    this.sBuffer.append("*feedline ").append(lines).append("\n");
     return this;
   }
 
@@ -343,21 +340,20 @@ public class PrintScriptUtil {
 
   // 判断特定的设备
   private boolean isX970(){
-     boolean isX970Device = false;
-     try {
-       Map<String, String> deviceInfo = BaseSystemManager.getInstance().getDeviceInfo();
-       Log.d("printer======>", deviceInfo.toString());
-       if ((deviceInfo.get(ModuleEnum.VENDOR).equals("VERIFONE")
-         || deviceInfo.get(ModuleEnum.MODEL).equals("X970")
-         || deviceInfo.get(ModuleEnum.MODEL).equals("X990"))
-         && deviceInfo.get(ModuleEnum.SERVICE_VER).compareTo("1.0.21") < 0
-       ) {
-         isX970Device = true;
-       }
-     }catch (Exception ignored){}
+    boolean isX970Device = false;
+    try {
+      Map<String, String> deviceInfo = BaseSystemManager.getInstance().getDeviceInfo();
+      Log.d("printer======>", deviceInfo.toString());
+      if ((deviceInfo.get(ModuleEnum.VENDOR).equals("VERIFONE")
+        || deviceInfo.get(ModuleEnum.MODEL).equals("X970")
+        || deviceInfo.get(ModuleEnum.MODEL).equals("X990"))
+        && deviceInfo.get(ModuleEnum.SERVICE_VER).compareTo("1.0.21") < 0
+      ) {
+        isX970Device = true;
+      }
+    }catch (Exception ignored){}
 
     return isX970Device;
   }
-
 
 }
