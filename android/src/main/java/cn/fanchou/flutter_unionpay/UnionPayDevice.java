@@ -229,6 +229,9 @@ public class UnionPayDevice {
       case 8:
         text = model.goodsDamagePrint(printInfo);
         break;
+      case 9:
+        text = model.mtOrderInfo(printInfo);
+        break;
       default:
         text = buildText();
     }

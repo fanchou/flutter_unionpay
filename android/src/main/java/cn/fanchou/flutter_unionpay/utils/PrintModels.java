@@ -14,14 +14,21 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import cn.fanchou.flutter_unionpay.beans.handing.CouponPayDetailsItem;
 import cn.fanchou.flutter_unionpay.beans.handing.HandingInfo;
 import cn.fanchou.flutter_unionpay.beans.order.CardListItem;
 import cn.fanchou.flutter_unionpay.beans.order.CouponPayInfosItem;
+import cn.fanchou.flutter_unionpay.beans.order.DetailItem;
+import cn.fanchou.flutter_unionpay.beans.order.ExtrasItem;
 import cn.fanchou.flutter_unionpay.beans.order.GoodsListItem;
+import cn.fanchou.flutter_unionpay.beans.order.MeituanOrderModel;
 import cn.fanchou.flutter_unionpay.beans.order.OrderInfo;
 import cn.fanchou.flutter_unionpay.beans.order.PayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.order.RefundPayChannelListItem;
@@ -166,7 +173,7 @@ public class PrintModels {
     if (orderInfo.getTradeBillType() == 1) {
       goodList = orderInfo.getOrderGoodsInfo().getGoodsList();
     } else {
-       goodList = orderInfo.getRefundOrderInfo().getRefundOrderGoodsInfo().getGoodsList();
+      goodList = orderInfo.getRefundOrderInfo().getRefundOrderGoodsInfo().getGoodsList();
     }
 
     String orderId = orderInfo.getOrderId();
@@ -200,10 +207,10 @@ public class PrintModels {
 
 
     printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE,"8","6")
-    .text(ScriptConstant.CENTER, orderInfo.getTradeBillType() == 1 ? brandName + "-" + orderInfo.getStoreName() : "(退)" + brandName + "-" + orderInfo.getStoreName())
-    .emptyLines(1)
-    .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
-    .text(ScriptConstant.LEFT, "收银员：" + orderInfo.getOrderOperatorFullName());
+      .text(ScriptConstant.CENTER, orderInfo.getTradeBillType() == 1 ? brandName + "-" + orderInfo.getStoreName() : "(退)" + brandName + "-" + orderInfo.getStoreName())
+      .emptyLines(1)
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+      .text(ScriptConstant.LEFT, "收银员：" + orderInfo.getOrderOperatorFullName());
 
     if (orderInfo.getTradeBillType() == 1) {
       printer.text(ScriptConstant.LEFT, "买单时间：" + orderInfo.getCreateTime());
@@ -495,6 +502,179 @@ public class PrintModels {
     printer.addBarcode(ScriptConstant.CENTER, barcode);
     printer.emptyLines(1);
     printer.emptyLines(1);
+
+    return printer.getString();
+  }
+
+  /**
+   * 美团外卖订单打印
+   **/
+  public String mtOrderInfo(Map printInfo) {
+    PrintScriptUtil printer = new PrintScriptUtil();
+    boolean againBool = (boolean) printInfo.get("againBool");
+    String order = (String) printInfo.get("mtOrderInfo");
+    Log.d("美团打印数据========> ", order);
+    JSONObject json = JSON.parseObject(order);
+    MeituanOrderModel orderInfo = JSON.parseObject(json.toJSONString(), MeituanOrderModel.class);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    String createString = orderInfo.getCtime();
+    String createTime = sdf.format(new Date(Integer.parseInt(createString) * 1000L));
+
+    String deliveryTime;
+    if(orderInfo.getDeliveryTime().equals("0")){
+      deliveryTime = "立即送达";
+    }else{
+      deliveryTime = sdf.format(new Date(Integer.parseInt(orderInfo.getDeliveryTime()) * 1000L));
+    }
+
+
+    if (againBool) {
+      printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+        .text(ScriptConstant.CENTER, "重新打印")
+        .emptyLines(1);
+    }
+
+    printer
+      .text(ScriptConstant.CENTER, "*** #" + orderInfo.getDaySeq() + " 美团外卖 ***")
+      .text(ScriptConstant.CENTER, "*" + orderInfo.getWmPoiName() + "*");
+
+    printer.setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
+      .emptyLines(1)
+      .text(ScriptConstant.LEFT,"订单号：" + orderInfo.getOrderId())
+      .text(ScriptConstant.LEFT, "下单时间：" + createTime)
+      .setNextFormat(ScriptConstant.NORMAL_LARGE,ScriptConstant.NORMAL_LARGE)
+      .text(ScriptConstant.LEFT,"期望送达: " + deliveryTime)
+      .setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
+      .addLine();
+
+    // todo 打印商品列表
+    List<DetailItem> goodsList = orderInfo.getDetail();
+
+    List<List<DetailItem>> packageGoodsList = new LinkedList<>();
+
+    Set<Integer> packages = new HashSet<>();
+
+    // 第一次循环拿到所有的口袋编号
+    for (DetailItem element: goodsList){
+      packages.add(element.getCartId());
+    }
+
+    // 找到口袋编码相同的商品
+    for (Integer element: packages){
+      List<DetailItem> samePackage = new LinkedList<>();
+      for (DetailItem item: goodsList){
+        if(item.getCartId() == element){
+          samePackage.add(item);
+        }
+      }
+      packageGoodsList.add(samePackage);
+    }
+
+
+    for (int i = 0; i < packageGoodsList.size(); i++){
+      printer.text(ScriptConstant.LEFT,"--------" + (i + 1) + "号口袋--------");
+      for (DetailItem element: goodsList) {
+        String specString = "";
+        if(element.getSpec() != null && !element.getSpec().equals("")){
+          specString += element.getSpec();
+        }
+
+        if(specString != ""){
+          specString = "[" + specString + "]";
+        }
+
+        printer.printTable(
+          new int[]{16, 8, 8},
+          new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.RIGHT},
+          new String[]{
+            element.getFoodName() + specString,
+            "*" + element.getQuantity(),
+            String.valueOf(element.getActualPrice())
+
+          }
+        );
+      }
+      printer.emptyLines(1);
+    }
+
+    printer.text(ScriptConstant.LEFT,"--------其他-------");
+
+    printer.printTable(
+      new int[]{16,16},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+      new String[]{
+        "打包费：",
+        orderInfo.getPackageBagMoneyYuan()
+      }
+    );
+
+    printer.printTable(
+      new int[]{16,16},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+      new String[]{
+        "配送费：",
+        orderInfo.getShippingFee()
+      }
+    );
+
+
+    List<ExtrasItem> extrasInfo = orderInfo.getExtras();
+    List<Map<String, Object>> sameTypeExtrasInfo = new LinkedList<>();
+    Set<Integer> extrasInfoType = new LinkedHashSet<>();
+
+    if(extrasInfo != null && extrasInfo.size() > 0) {
+      // 找到所有类型
+      for (ExtrasItem element: extrasInfo){
+        extrasInfoType.add(element.getType());
+      }
+      for (Integer type: extrasInfoType){
+        Map<String, Object> extrasTotal = new HashMap<>();
+        extrasTotal.put("type", type);
+        double totalFee = 0.0;
+        for (ExtrasItem element: extrasInfo){
+          if(element.getType() == type){
+            totalFee += element.getReduceFee();
+          }
+        }
+        extrasTotal.put("totalFee", totalFee);
+        sameTypeExtrasInfo.add(extrasTotal);
+      }
+
+      // 打印所有的优惠
+      for (Map<String, Object> element: sameTypeExtrasInfo){
+        printer.printTable(
+          new int[]{16,16},
+          new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+          new String[]{
+            MeituanStatus.extrasStatus.get(element.get("type")),
+            element.get("totalFee").toString()
+          }
+        );
+      }
+    }
+
+    printer.addLine()
+      .text(ScriptConstant.RIGHT, "订单原价(含运费和打包费)" + orderInfo.getOriginalPrice())
+      .setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
+      .text(ScriptConstant.RIGHT, "实付金额：" + (orderInfo.getPoiReceiveDetail().getOnlinePayment() / 100.0) + "元")
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+      .addLine();
+
+    printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
+      .text(ScriptConstant.LEFT, orderInfo.getRecipientAddress())
+      .emptyLines(1)
+      .text(ScriptConstant.LEFT, orderInfo.getCaution())
+      .emptyLines(1)
+      .setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
+      .text(ScriptConstant.LEFT, "顾客号码：" + orderInfo.getRecipientPhone())
+      .text(ScriptConstant.LEFT, "备用号码：" + orderInfo.getBackupRecipientPhone())
+      .text(ScriptConstant.LEFT, "【若无法拨通，请通过美团外卖商家端查询最新号码】")
+      .text(ScriptConstant.LEFT, orderInfo.getRecipientName())
+      .emptyLines(1)
+      .text(ScriptConstant.LEFT, "门店电话：" + orderInfo.getWmPoiPhone())
+      .text(ScriptConstant.LEFT, "门店地址：" + orderInfo.getWmPoiAddress())
+      .emptyLines(1)
+      .emptyLines(1);
 
     return printer.getString();
   }
@@ -965,8 +1145,8 @@ public class PrintModels {
       new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT, ScriptConstant.LEFT},
       new String[]{
         "报损总计：",
-       "数量:" + totalNum,
-       "价格: " + totalPrice,
+        "数量:" + totalNum,
+        "价格: " + totalPrice,
       }
     );
 
@@ -989,8 +1169,8 @@ public class PrintModels {
       .text(ScriptConstant.LEFT,  (printInfo.get("status").toString().equals("1") ? "实付总额" : "退款总额") +": " +  printInfo.get("money").toString());
 
     if(printInfo.get("aCard") != null){
-        psu.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "8", "6");
-        psu.text("50", "A卡:" + printInfo.get("aCard").toString());
+      psu.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE, "8", "6");
+      psu.text("50", "A卡:" + printInfo.get("aCard").toString());
     }
 
     if(printInfo.get("bCard") != null){
