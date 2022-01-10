@@ -475,7 +475,8 @@ public class PrintModels {
 
     // 打印二维码
     printer.setQrqodeSize(4);
-    printer.addQrcode(ScriptConstant.CENTER,"https://mp.weixin.qq.com/a/~~ijlvQrlK1O4~MQpoT5D1CIah18uDnFwvhQ~~");
+//    printer.addQrcode(ScriptConstant.CENTER,"https://mp.weixin.qq.com/a/~~ijlvQrlK1O4~MQpoT5D1CIah18uDnFwvhQ~~");
+    printer.addQrcode(ScriptConstant.CENTER,"https://cjvognsddt.ugc.wb.miemie.la/H5/area_code?config_hid=sQMgUiA3OwK&is_hidden_weiban_logo=0");
     printer.emptyLines(1);
     if(orderInfo.getStatus() == 20 || orderInfo.getStatus() == 40) {
       if(isLinzhan){
