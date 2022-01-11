@@ -471,7 +471,7 @@ public class PrintModels {
 
     printer.emptyLines(1);
 
-    printer.text(ScriptConstant.LEFT,"感谢光临,关注鲜范在线下单，送货上门");
+    printer.text(ScriptConstant.LEFT,"微信扫一扫，领5元优惠");
 
     // 打印二维码
     printer.setQrqodeSize(4);
