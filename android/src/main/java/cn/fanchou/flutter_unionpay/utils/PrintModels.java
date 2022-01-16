@@ -471,12 +471,17 @@ public class PrintModels {
 
     printer.emptyLines(1);
 
-    printer.text(ScriptConstant.LEFT,"微信扫一扫，领5元优惠");
-
-    // 打印二维码
-    printer.setQrqodeSize(4);
-//    printer.addQrcode(ScriptConstant.CENTER,"https://mp.weixin.qq.com/a/~~ijlvQrlK1O4~MQpoT5D1CIah18uDnFwvhQ~~");
-    printer.addQrcode(ScriptConstant.CENTER,"https://cjvognsddt.ugc.wb.miemie.la/api/contact_way/region/web/entry?config_hid=sQMgUiA3OwK");
+    if(brandName.equals("面包新语")){
+      printer.text(ScriptConstant.LEFT,"微信扫一扫，领5元优惠");
+      // 打印二维码
+      printer.setQrqodeSize(4);
+      printer.addQrcode(ScriptConstant.CENTER,"https://cjvognsddt.ugc.wb.miemie.la/api/contact_way/region/web/entry?config_hid=sQMgUiA3OwK");
+    }else{
+      printer.text(ScriptConstant.LEFT,"感谢光临,关注鲜范在线下单，送货上门");
+      // 打印二维码
+      printer.setQrqodeSize(4);
+      printer.addQrcode(ScriptConstant.CENTER,"https://mp.weixin.qq.com/a/~~ijlvQrlK1O4~MQpoT5D1CIah18uDnFwvhQ~~");
+    }
     printer.emptyLines(1);
     if(orderInfo.getStatus() == 20 || orderInfo.getStatus() == 40) {
       if(isLinzhan){
@@ -493,6 +498,7 @@ public class PrintModels {
         printer.emptyLines(1);
       }
     }
+
 
     printer.text(ScriptConstant.LEFT, "门店电话：" + orderInfo.getStorePhoneNo());
     printer.text(ScriptConstant.LEFT, "门店地址：" + orderInfo.getStoreAddress());
