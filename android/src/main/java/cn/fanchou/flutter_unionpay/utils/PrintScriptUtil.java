@@ -140,7 +140,12 @@ public class PrintScriptUtil {
    * @param lines 行数
    **/
   public PrintScriptUtil emptyLines(int lines) {
-    this.sBuffer.append("*feedline ").append(lines).append("\n");
+    if(isX970()){
+      text("l","");
+    }else{
+      this.sBuffer.append("*feedline ").append(lines).append("\n");
+    }
+    
     return this;
   }
 
