@@ -46,6 +46,9 @@ public class DetailItem{
 	@JSONField(name="spec")
 	private String spec;
 
+  @JSONField(name="food_property")
+  private String foodProperty;
+
 	@JSONField(name="cart_id")
 	private int cartId;
 
@@ -166,6 +169,15 @@ public class DetailItem{
 	public String getSpec(){
 		return spec;
 	}
+
+  public void setFoodProperty(String foodProperty){
+    this.foodProperty = foodProperty;
+  }
+
+  public String getFoodProperty(){
+    return foodProperty;
+  }
+
 
 	public void setCartId(int cartId){
 		this.cartId = cartId;

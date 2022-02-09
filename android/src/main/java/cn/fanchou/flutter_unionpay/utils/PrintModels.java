@@ -582,12 +582,21 @@ public class PrintModels {
       printer.text(ScriptConstant.LEFT,"--------" + (i + 1) + "号口袋--------");
       for (DetailItem element: goodsList) {
         String specString = "";
+
         if(element.getSpec() != null && !element.getSpec().equals("")){
           specString += element.getSpec();
         }
 
-        if(specString != ""){
-          specString = "[" + specString + "]";
+        if(element.getFoodProperty() != null && !element.getFoodProperty().equals("")){
+          if(!specString.equals("")){
+            specString += "," + element.getFoodProperty();
+          }else{
+            specString += element.getFoodProperty();
+          }
+        }
+
+        if(!specString.equals("")){
+          specString = "(" + specString + ")";
         }
 
         printer.printTable(
