@@ -600,7 +600,7 @@ public class PrintModels {
         }
 
         printer.printTable(
-          new int[]{16, 8, 8},
+          new int[]{18, 6, 8},
           new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.RIGHT},
           new String[]{
             element.getFoodName() + specString,
