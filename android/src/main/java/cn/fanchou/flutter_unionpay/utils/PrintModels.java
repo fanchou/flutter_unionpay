@@ -580,7 +580,7 @@ public class PrintModels {
 
     for (int i = 0; i < packageGoodsList.size(); i++){
       printer.text(ScriptConstant.LEFT,"--------" + (i + 1) + "号口袋--------");
-      for (DetailItem element: goodsList) {
+      for (DetailItem element: packageGoodsList.get(i)) {
         String specString = "";
 
         if(element.getSpec() != null && !element.getSpec().equals("")){
