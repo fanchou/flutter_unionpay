@@ -583,16 +583,16 @@ public class PrintModels {
       for (DetailItem element: packageGoodsList.get(i)) {
         String specString = "";
 
-        if(element.getSpec() != null && !element.getSpec().equals("")){
-          specString += element.getSpec();
-        }
+//        if(element.getSpec() != null && !element.getSpec().equals("")){
+//          specString += element.getSpec();
+//        }
 
         if(element.getFoodProperty() != null && !element.getFoodProperty().equals("")){
-          if(!specString.equals("")){
-            specString += "," + element.getFoodProperty();
-          }else{
+//          if(!specString.equals("")){
+//            specString += "," + element.getFoodProperty();
+//          }else{
             specString += element.getFoodProperty();
-          }
+//          }
         }
 
         if(!specString.equals("")){
@@ -601,12 +601,11 @@ public class PrintModels {
 
         printer.printTable(
           new int[]{18, 6, 8},
-          new String[]{ScriptConstant.LEFT, ScriptConstant.CENTER, ScriptConstant.RIGHT},
+          new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT, ScriptConstant.RIGHT},
           new String[]{
             element.getFoodName() + specString,
             "*" + element.getQuantity(),
-            String.valueOf(element.getActualPrice())
-
+            String.valueOf(element.getPrice() * element.getQuantity())
           }
         );
       }
