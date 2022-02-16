@@ -675,19 +675,23 @@ public class PrintModels {
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
       .addLine();
 
-
     if(orderInfo.getHasInvoiced().equals("1")){
       printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
         .text(ScriptConstant.LEFT,"发票：【公司】" + orderInfo.getInvoiceTitle() + ";【税号】" + orderInfo.getTaxpayerId())
         .emptyLines(1);
     }
 
+    if(!orderInfo.getCaution().equals("")){
+      printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
+        .text(ScriptConstant.LEFT, "备注：" + orderInfo.getCaution())
+        .emptyLines(1);
+    }
+
     printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
       .text(ScriptConstant.LEFT, orderInfo.getRecipientAddress())
-      .emptyLines(1)
-      .text(ScriptConstant.LEFT, orderInfo.getCaution())
-      .emptyLines(1)
-      .setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
+      .emptyLines(1);
+
+    printer.setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
       .text(ScriptConstant.LEFT, "顾客号码：" + orderInfo.getRecipientPhone())
       .text(ScriptConstant.LEFT, "备用号码：" + orderInfo.getBackupRecipientPhone())
       .text(ScriptConstant.LEFT, "【若无法拨通，请通过美团外卖商家端查询最新号码】")
