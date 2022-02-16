@@ -675,6 +675,13 @@ public class PrintModels {
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
       .addLine();
 
+
+    if(orderInfo.getHasInvoiced().equals("1")){
+      printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
+        .text(ScriptConstant.LEFT,"发票：【公司】" + orderInfo.getInvoiceTitle() + ";【税号】" + orderInfo.getTaxpayerId())
+        .emptyLines(1);
+    }
+
     printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
       .text(ScriptConstant.LEFT, orderInfo.getRecipientAddress())
       .emptyLines(1)
