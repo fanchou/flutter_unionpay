@@ -554,6 +554,18 @@ public class PrintModels {
       .setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
       .addLine();
 
+    if(orderInfo.getHasInvoiced().equals("1")){
+      printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
+        .text(ScriptConstant.LEFT,"发票：【公司】" + orderInfo.getInvoiceTitle() + ";【税号】" + orderInfo.getTaxpayerId())
+        .emptyLines(1);
+    }
+
+    if(!orderInfo.getCaution().equals("")){
+      printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
+        .text(ScriptConstant.LEFT, "备注：" + orderInfo.getCaution())
+        .emptyLines(1);
+    }
+
     // todo 打印商品列表
     List<DetailItem> goodsList = orderInfo.getDetail();
 
@@ -579,20 +591,21 @@ public class PrintModels {
 
 
     for (int i = 0; i < packageGoodsList.size(); i++){
-      printer.text(ScriptConstant.LEFT,"--------" + (i + 1) + "号口袋--------");
+      printer.setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
+        .text(ScriptConstant.LEFT,"--------" + (i + 1) + "号口袋--------");
       for (DetailItem element: packageGoodsList.get(i)) {
         String specString = "";
 
-//        if(element.getSpec() != null && !element.getSpec().equals("")){
-//          specString += element.getSpec();
-//        }
+        if(element.getSpec() != null && !element.getSpec().equals("")){
+          specString += element.getSpec();
+        }
 
         if(element.getFoodProperty() != null && !element.getFoodProperty().equals("")){
-//          if(!specString.equals("")){
-//            specString += "," + element.getFoodProperty();
-//          }else{
+          if(!specString.equals("")){
+            specString += "," + element.getFoodProperty();
+          }else{
             specString += element.getFoodProperty();
-//          }
+          }
         }
 
         if(!specString.equals("")){
@@ -674,18 +687,6 @@ public class PrintModels {
       .text(ScriptConstant.RIGHT, "实付金额：" + (orderInfo.getPoiReceiveDetail().getOnlinePayment() / 100.0) + "元")
       .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
       .addLine();
-
-    if(orderInfo.getHasInvoiced().equals("1")){
-      printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
-        .text(ScriptConstant.LEFT,"发票：【公司】" + orderInfo.getInvoiceTitle() + ";【税号】" + orderInfo.getTaxpayerId())
-        .emptyLines(1);
-    }
-
-    if(!orderInfo.getCaution().equals("")){
-      printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
-        .text(ScriptConstant.LEFT, "备注：" + orderInfo.getCaution())
-        .emptyLines(1);
-    }
 
     printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
       .text(ScriptConstant.LEFT, orderInfo.getRecipientAddress())
