@@ -472,7 +472,7 @@ public class PrintModels {
     printer.emptyLines(1);
 
     if(brandName.equals("面包新语")){
-      printer.text(ScriptConstant.CENTER,"微信扫一扫，领5元优惠");
+      printer.text(ScriptConstant.CENTER,"微信加好友，领5元优惠");
       // 打印二维码
       printer.setQrqodeSize(4);
       printer.addQrcode(ScriptConstant.CENTER,"https://cjvognsddt.ugc.wb.miemie.la/api/contact_way/region/web/entry?config_hid=sQMgUiA3OwK");
