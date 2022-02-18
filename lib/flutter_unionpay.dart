@@ -121,16 +121,20 @@ class FlutterUnionpay {
   /// todo 异常情况的处理，不然会导致打印机不响应的问题
   /// todo 考虑是否需要提前初始化设备
   static void startPrint(int type, Map printInfo) async {
-    Map<String, dynamic>? result = await deviceServiceLogin();
-    if(result!['code'] == "200"){
-      print("设备注册成功");
-      Map<String, dynamic>? printResult = await _unionPayChannel.invokeMapMethod('startPrint',{
-        "printInfo": printInfo,
-        "type": type
-      });
-      if(printResult!['code'] == '200'){
-        await deviceServiceLogout();
-      }
-    }
+    // Map<String, dynamic>? result = await deviceServiceLogin();
+    // if(result!['code'] == "200"){
+    //   print("设备注册成功");
+    //   Map<String, dynamic>? printResult = await _unionPayChannel.invokeMapMethod('startPrint',{
+    //     "printInfo": printInfo,
+    //     "type": type
+    //   });
+    //   if(printResult!['code'] == '200'){
+    //     await deviceServiceLogout();
+    //   }
+    // }
+    Map<String, dynamic>? printResult = await _unionPayChannel.invokeMapMethod('startPrint',{
+      "printInfo": printInfo,
+      "type": type
+    });
   }
 }
