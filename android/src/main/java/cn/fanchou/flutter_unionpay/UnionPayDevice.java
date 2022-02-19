@@ -47,13 +47,13 @@ public class UnionPayDevice {
         resCode -> {//arg0具体可参考常量类ServiceResult
           if (ServiceResult.Success == resCode || ServiceResult.LOGIN_SUCCESS_NOT_EMV_FILE == resCode || ServiceResult.LOGIN_SUCCESS == resCode) {
             Log.d("deviceLogin","设备注册成功");
-            try {
-              initScanner();
-            } catch (SdkException e) {
-              e.printStackTrace();
-            } catch (CallServiceException e) {
-              e.printStackTrace();
-            }
+//            try {
+//              initScanner();
+//            } catch (SdkException e) {
+//              e.printStackTrace();
+//            } catch (CallServiceException e) {
+//              e.printStackTrace();
+//            }
             params.put("code", "200");
             params.put("message", "设备注册成功！");
             uiThreadHandler.post(() -> result.success(params));
