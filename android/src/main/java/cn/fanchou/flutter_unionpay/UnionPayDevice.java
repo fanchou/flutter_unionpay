@@ -243,9 +243,10 @@ public class UnionPayDevice {
         @Override
         public void onPrintResult(int resCode) {//arg0具体可参考常量类ServiceResult
           //打印完成主动登出，避免持续占用设备硬件
-          params.put("code", "200");
-          params.put("message", "打印完成！");
-          uiThreadHandler.post(() -> result.success(params));
+//          params.put("code", "200");
+//          params.put("message", "打印完成！");
+//          uiThreadHandler.post(() -> result.success(params));
+          Log.d("printInfo", "==============" + resCode);
         }
       });
     } catch (CallServiceException e) {
