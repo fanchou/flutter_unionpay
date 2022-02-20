@@ -520,6 +520,8 @@ public class PrintModels {
     PrintScriptUtil printer = new PrintScriptUtil();
     boolean againBool = (boolean) printInfo.get("againBool");
     String order = (String) printInfo.get("mtOrderInfo");
+    order = order.replace("\\n","");
+
     Log.d("美团打印数据========> ", order);
     JSONObject json = JSON.parseObject(order);
     MeituanOrderModel orderInfo = JSON.parseObject(json.toJSONString(), MeituanOrderModel.class);
@@ -560,10 +562,17 @@ public class PrintModels {
         .emptyLines(1);
     }
 
-    if(!orderInfo.getCaution().equals("")){
-      printer.setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
-        .text(ScriptConstant.LEFT, "备注：" + orderInfo.getCaution())
-        .emptyLines(1);
+    String remark =  orderInfo.getCaution();
+
+    if(!remark.equals("")){
+
+      remark = remark.substring(0, remark.indexOf("收餐人隐私号"));
+      if(!remark.equals("")){
+        printer.emptyLines(1)
+          .setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
+          .text(ScriptConstant.LEFT, "备注：" + remark)
+          .emptyLines(1);
+      }
     }
 
     // todo 打印商品列表
