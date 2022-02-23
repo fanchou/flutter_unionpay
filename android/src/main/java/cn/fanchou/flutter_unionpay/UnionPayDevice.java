@@ -36,12 +36,14 @@ public class UnionPayDevice {
   private BasicMessageChannel<Object> scannerChannel;
   private Handler uiThreadHandler = new Handler(Looper.getMainLooper());
   Map<String, Object> params = new HashMap<>();
+  private Activity activity;
 
   /**
    * 设备硬件登录
    * */
-  public void deviceServiceLogin(Activity activity) {
+  public void deviceServiceLogin(Activity a) {
     try {
+      activity = a;
       BaseSystemManager.getInstance().deviceServiceLogin(
         activity, null, "99999999",//设备ID，填写任意8位数字
         resCode -> {//arg0具体可参考常量类ServiceResult
@@ -246,8 +248,20 @@ public class UnionPayDevice {
 //          params.put("code", "200");
 //          params.put("message", "打印完成！");
 //          uiThreadHandler.post(() -> result.success(params));
+
+          // todo 换成BasicMessageChannel的形式
+
+          if(resCode < 0) {
+            deviceServiceLogout();
+            deviceServiceLogin(activity);
+          }
+
           Log.d("printInfo", "==============" + resCode);
         }
+
+
+
+
       });
     } catch (CallServiceException e) {
       e.printStackTrace();
