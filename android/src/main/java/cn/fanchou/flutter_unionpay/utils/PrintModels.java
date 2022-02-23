@@ -565,8 +565,9 @@ public class PrintModels {
     String remark =  orderInfo.getCaution();
 
     if(!remark.equals("")){
-
-      remark = remark.substring(0, remark.indexOf("收餐人隐私号"));
+      if(remark.contains("收餐人隐私号")){
+        remark = remark.substring(0, remark.indexOf("收餐人隐私号"));
+      }
       if(!remark.equals("")){
         printer.emptyLines(1)
           .setNextFormat(ScriptConstant.LARGE,ScriptConstant.LARGE)
