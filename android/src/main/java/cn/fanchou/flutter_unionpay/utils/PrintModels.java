@@ -566,7 +566,8 @@ public class PrintModels {
 
     if(!remark.equals("")){
       if(remark.contains("收餐人隐私号")){
-        remark = remark.substring(0, remark.indexOf("收餐人隐私号"));
+        remark = remark.replaceFirst("收餐人隐私号[\\s\\S]{34}", "");
+//        remark = remark.substring(0, remark.indexOf("收餐人隐私号"));
       }
       if(!remark.equals("")){
         printer.emptyLines(1)
