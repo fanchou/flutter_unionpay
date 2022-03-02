@@ -259,13 +259,14 @@ public class UnionPayDevice {
           Log.d("printInfo", "==============" + resCode);
         }
 
-
-
-
       });
     } catch (CallServiceException e) {
       e.printStackTrace();
+      deviceServiceLogout();
+      deviceServiceLogin(activity);
     } catch (SdkException e) {
+      deviceServiceLogout();
+      deviceServiceLogin(activity);
       e.printStackTrace();
     }
   }
