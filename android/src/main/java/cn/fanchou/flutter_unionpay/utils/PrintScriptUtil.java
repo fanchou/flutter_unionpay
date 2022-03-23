@@ -145,7 +145,7 @@ public class PrintScriptUtil {
     }else{
       this.sBuffer.append("*feedline ").append(lines).append("\n");
     }
-    
+
     return this;
   }
 
@@ -268,6 +268,7 @@ public class PrintScriptUtil {
       table.add(formated);
     }
 
+
     /**  try to find the max row count of the table **/
     int maxRowCount = 0;
     for(int i=0;i<table.size()/*column count*/;i++){
@@ -301,7 +302,13 @@ public class PrintScriptUtil {
     for(int i=0;i<rowsToPrint.length;i++){
       rowsToPrint[i].append("\n\r");//wrap line..
       try {
-        text(columnAligns[i], rowsToPrint[i].toString());
+        String aligns;
+        if(i > columnAligns.length){
+          aligns = columnAligns[0];
+        }else {
+          aligns = columnAligns[i];
+        }
+        text(aligns, rowsToPrint[i].toString());
       }catch (Exception e){
         e.printStackTrace();
       }
