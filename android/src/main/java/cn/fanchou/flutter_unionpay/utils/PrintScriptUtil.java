@@ -303,7 +303,7 @@ public class PrintScriptUtil {
       rowsToPrint[i].append("\n\r");//wrap line..
       try {
         String aligns;
-        if(i > columnAligns.length){
+        if(i > columnAligns.length - 1){
           aligns = columnAligns[0];
         }else {
           aligns = columnAligns[i];
