@@ -712,6 +712,8 @@ public class PrintModels {
       .text(ScriptConstant.LEFT, "门店电话：" + orderInfo.getWmPoiPhone())
       .text(ScriptConstant.LEFT, "门店地址：" + orderInfo.getWmPoiAddress())
       .emptyLines(1)
+      .addBarcode(ScriptConstant.CENTER,orderInfo.getOrderId())
+      .emptyLines(1)
       .emptyLines(1);
 
     return printer.getString();
