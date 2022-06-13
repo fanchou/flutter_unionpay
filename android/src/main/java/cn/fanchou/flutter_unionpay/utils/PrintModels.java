@@ -600,6 +600,8 @@ public class PrintModels {
       packageGoodsList.add(samePackage);
     }
 
+    double packageMoney = 0.0;
+
 
     for (int i = 0; i < packageGoodsList.size(); i++){
       printer.setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
@@ -623,6 +625,8 @@ public class PrintModels {
           specString = "(" + specString + ")";
         }
 
+        packageMoney += element.getBoxPrice();
+
         printer.printTable(
           new int[]{18, 6, 8},
           new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT, ScriptConstant.RIGHT},
@@ -643,7 +647,7 @@ public class PrintModels {
       new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
       new String[]{
         "打包费：",
-        orderInfo.getPackageBagMoneyYuan()
+        String.valueOf(packageMoney)
       }
     );
 
@@ -664,32 +668,40 @@ public class PrintModels {
     if(extrasInfo != null && extrasInfo.size() > 0) {
       // 找到所有类型
       for (ExtrasItem element: extrasInfo){
-        extrasInfoType.add(element.getType());
-      }
-      for (Integer type: extrasInfoType){
-        Map<String, Object> extrasTotal = new HashMap<>();
-        extrasTotal.put("type", type);
-        double totalFee = 0.0;
-        for (ExtrasItem element: extrasInfo){
-          if(element.getType() == type){
-            totalFee += element.getReduceFee();
-          }
-        }
-        extrasTotal.put("totalFee", totalFee);
-        sameTypeExtrasInfo.add(extrasTotal);
-      }
-
-      // 打印所有的优惠
-      for (Map<String, Object> element: sameTypeExtrasInfo){
         printer.printTable(
           new int[]{16,16},
           new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
           new String[]{
-            MeituanStatus.extrasStatus.get(element.get("type")),
-            element.get("totalFee").toString()
+            element.getRemark(),
+            String.valueOf(element.getReduceFee())
           }
         );
       }
+
+//      for (Integer type: extrasInfoType){
+//        Map<String, Object> extrasTotal = new HashMap<>();
+//        extrasTotal.put("type", type);
+//        double totalFee = 0.0;
+//        for (ExtrasItem element: extrasInfo){
+//          if(element.getType() == type){
+//            totalFee += element.getReduceFee();
+//          }
+//        }
+//        extrasTotal.put("totalFee", totalFee);
+//        sameTypeExtrasInfo.add(extrasTotal);
+//      }
+//
+//      // 打印所有的优惠
+//      for (Map<String, Object> element: sameTypeExtrasInfo){
+//        printer.printTable(
+//          new int[]{16,16},
+//          new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
+//          new String[]{
+//            MeituanStatus.extrasStatus.get(element.get("type")),
+//            element.get("totalFee").toString()
+//          }
+//        );
+//      }
     }
 
     printer.addLine()

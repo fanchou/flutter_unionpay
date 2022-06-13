@@ -48,6 +48,7 @@ public class MeituanStatus {
         extrasStatus.put(305,"津贴联盟");
         extrasStatus.put(306,"立减金");
         extrasStatus.put(307,"套餐推荐津贴");
+        extrasStatus.put(73,"立减活动");
         extrasStatus.put(76,"品质秒杀");
         extrasStatus.put(64,"老客爆品");
     }
