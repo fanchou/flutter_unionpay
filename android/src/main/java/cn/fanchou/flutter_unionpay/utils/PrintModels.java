@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -642,12 +643,14 @@ public class PrintModels {
 
     printer.text(ScriptConstant.LEFT,"--------其他-------");
 
+    DecimalFormat decimalFormat = new DecimalFormat(".00");
+
     printer.printTable(
       new int[]{16,16},
       new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
       new String[]{
-        "打包费：",
-        String.valueOf(packageMoney)
+        "打包费",
+        decimalFormat.format(packageMoney)
       }
     );
 
@@ -655,7 +658,7 @@ public class PrintModels {
       new int[]{16,16},
       new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
       new String[]{
-        "配送费：",
+        "配送费",
         orderInfo.getShippingFee()
       }
     );
@@ -669,11 +672,11 @@ public class PrintModels {
       // 找到所有类型
       for (ExtrasItem element: extrasInfo){
         printer.printTable(
-          new int[]{16,16},
+          new int[]{24,8},
           new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
           new String[]{
             element.getRemark(),
-            String.valueOf(element.getReduceFee())
+            "-" + element.getReduceFee()
           }
         );
       }
