@@ -643,12 +643,14 @@ public class PrintModels {
 
     printer.text(ScriptConstant.LEFT,"--------其他-------");
 
+    DecimalFormat df = new DecimalFormat("#.0");
+
     printer.printTable(
       new int[]{16,16},
       new String[]{ScriptConstant.LEFT, ScriptConstant.RIGHT},
       new String[]{
         "打包费",
-        String.format("%.1f", packageMoney)
+        df.format(packageMoney)
       }
     );
 
