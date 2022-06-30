@@ -237,6 +237,9 @@ public class UnionPayDevice {
       case 10:
         text = model.printDateCashierInfo(printInfo);
         break;
+      case 11:
+        text = model.orderGoodsSummary(printInfo);
+        break;
       default:
         text = buildText();
     }

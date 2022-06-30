@@ -1334,5 +1334,118 @@ public class PrintModels {
     psu.emptyLines(3);
     return psu.getString();
   }
+  /**
+   * 鲜范卡交易汇总
+   **/
+  public String orderGoodsSummary(Map printInfo) {
+
+    PrintScriptUtil printer = new PrintScriptUtil();
+
+    String summaryInfoStr = (String) printInfo.get("summaryInfo");
+    JSONObject json = JSON.parseObject(summaryInfoStr);
+    Map params =  JSONObject.parseObject(json.toJSONString());
+    // 汇总数据
+    Map summaryData = (Map) params.get("summaryData");
+    // 订货汇总
+    List<Map> supplierSummarys = (List) summaryData.get("supplierSummary");
+    // 按分类汇总
+    List<Map> frontendSummarys = (List) summaryData.get("frontendSummary");
+
+
+    // 时间
+    String dateStr =  params.get("startTime") + "-" + params.get("endTime");
+
+
+    // 标题
+    printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+      .text(ScriptConstant.CENTER, "订货汇总单")
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
+
+    printer.emptyLines(1);
+    // 门店名称
+    if (params.get("storeName") != null) {
+      printer.printTable(
+        new int[]{10, 22},
+        new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+        new String[]{
+          "门店名称：",
+          (String) params.get("storeName")
+        }
+      );
+      // 换行
+      printer.emptyLines(1);
+    }
+    // 时间范围
+    printer.printTable(
+      new int[]{10, 22},
+      new String[]{ScriptConstant.LEFT, ScriptConstant.LEFT},
+      new String[]{
+        "时间范围：",
+        dateStr
+      }
+    );
+    // 换行
+    printer.emptyLines(1);
+    // 订货汇总
+    for (Map supplier:supplierSummarys){
+      printer.printTable(
+        new int[]{16, 8, 8},
+        new String[]{ScriptConstant.LEFT,ScriptConstant.CENTER,ScriptConstant.CENTER,},
+        new String[]{
+          (String) supplier.get("name"),
+          String.valueOf(supplier.get("finalQuantity")),
+          String.valueOf(supplier.get("costPrice"))
+        }
+      );
+    }
+    // 换行
+    printer.emptyLines(1);
+    // 分类汇总
+    for (Map frontend:frontendSummarys){
+      // 表头
+      printer.printTable(
+        new int[]{12, 10, 10},
+        new String[]{ScriptConstant.LEFT,ScriptConstant.CENTER,ScriptConstant.CENTER,},
+        new String[]{
+          (String) frontend.get("name"),
+          "最终数量",
+          "最终金额"
+        }
+      );
+      // 分割线
+      printer.addLine();
+      List<Map> subList = (List) frontend.get("subList");
+      for (Map goods:subList){
+        // 商品列表
+        printer.printTable(
+          new int[]{12, 10, 10},
+          new String[]{ScriptConstant.LEFT,ScriptConstant.CENTER,ScriptConstant.CENTER,},
+          new String[]{
+            (String) goods.get("name"),
+            String.valueOf(goods.get("finalQuantity")),
+            String.valueOf(goods.get("costPrice"))
+          }
+        );
+      }
+      // 分割线
+      printer.addLine();
+      // 合计
+      printer.printTable(
+        new int[]{12, 10, 10},
+        new String[]{ScriptConstant.LEFT,ScriptConstant.CENTER,ScriptConstant.CENTER,},
+        new String[]{
+          "合计:",
+          String.valueOf(frontend.get("finalQuantity")),
+          String.valueOf(frontend.get("costPrice"))
+        }
+      );
+      // 换行
+      printer.emptyLines(1);
+    }
+    // 换行
+    printer.emptyLines(1);
+
+    return printer.getString();
+  }
 
 }
