@@ -16,6 +16,9 @@ public class GoodsItem{
 	@JSONField(name="num")
 	private double num;
 
+	@JSONField(name="mainUnitNum")
+	private double mainUnitNum;
+
 	@JSONField(name="weight")
 	private double weight;
 
@@ -84,6 +87,13 @@ public class GoodsItem{
 		return num;
 	}
 
+	public void setMainUnitNum(double mainUnitNum){
+		this.mainUnitNum = mainUnitNum;
+	}
+
+	public double getMainUnitNum(){
+		return mainUnitNum;
+	}
 	public void setWeight(double weight){
 		this.weight = weight;
 	}

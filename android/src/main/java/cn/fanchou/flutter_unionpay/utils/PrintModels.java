@@ -1163,7 +1163,7 @@ public class PrintModels {
           new String[]{
             goods.getDamageReason(),
             subName,
-            String.valueOf(goods.getWeight() > 0 ? goods.getWeight() : goods.getNum()),
+            String.valueOf(goods.getWeight() > 0 ? goods.getWeight() : goods.mainUnitNum()),
             !goods.getUnit().equals("") ? goods.getUnit() : "无",
             format2(percentage) + "%"
           }
