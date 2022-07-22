@@ -1447,5 +1447,65 @@ public class PrintModels {
 
     return printer.getString();
   }
+  /**
+   * 订货单首页打印
+   **/
+  public String orderGoodsHome(Map printInfo) {
 
+    PrintScriptUtil printer = new PrintScriptUtil();
+
+    String orderGoodeInfo = (String) printInfo.get("orderGoodeInfo");
+    JSONObject json = JSON.parseObject(orderGoodeInfo);
+    Map params = JSONObject.parseObject(json.toJSONString());
+    // 标题
+    printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+            .text(ScriptConstant.CENTER, (String) params.get("title"))
+            .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL);
+    //门店
+    printer.setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+            .text(ScriptConstant.CENTER, (String) params.get("curStoreName"));
+    printer.emptyLines(1);
+    //日期
+    printer.setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+            .text(ScriptConstant.LEFT, (String) params.get("orderDate"));
+    printer.setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+            .text(ScriptConstant.LEFT, (String) params.get("deliveryDate"));
+    //供应商集合
+    List<Map> supList = (List<Map>) params.get("suppliers");
+    for (Map sup:supList){
+      printer.emptyLines(2);
+      String supName = (String) sup.get("supplierName") + sup.get("workshopName");
+      printer.setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL).text(ScriptConstant.LEFT,supName);
+      // 分割线
+      printer.addLine();
+      printer.printTable(
+              new int[]{14, 9, 9},
+              new String[]{ScriptConstant.LEFT,ScriptConstant.LEFT,ScriptConstant.LEFT,},
+              new String[]{
+                      "名称",
+                      "订货量",
+                      "发货量"
+              }
+      );
+      List<Map> skuList = (List<Map>) sup.get("skuList");
+      for (Map sku:skuList) {
+        String skuName = (String) sku.get("skuName");
+        if(sku.get("skuRemark") != null) {
+          skuName += sku.get("skuRemark");
+        }
+        printer.text(ScriptConstant.LEFT,skuName);
+        printer.printTable(
+                new int[]{14, 9, 9},
+                new String[]{ScriptConstant.LEFT,ScriptConstant.LEFT,ScriptConstant.LEFT,},
+                new String[]{
+                        (String) sku.get("encoding"),
+                        String.valueOf(sku.get("orderAmount")) + sku.get("unitValue"),
+                        String.valueOf(sku.get("shipment")) + sku.get("unitValue")
+                }
+        );
+      }
+
+    }
+    return printer.getString();
+  }
 }

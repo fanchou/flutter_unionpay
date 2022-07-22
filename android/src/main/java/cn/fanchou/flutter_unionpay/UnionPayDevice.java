@@ -240,6 +240,9 @@ public class UnionPayDevice {
       case 11:
         text = model.orderGoodsSummary(printInfo);
         break;
+      case 12:
+        text = model.orderGoodsHome(printInfo);
+        break;
       default:
         text = buildText();
     }
