@@ -1490,7 +1490,7 @@ public class PrintModels {
       List<Map> skuList = (List<Map>) sup.get("skuList");
       for (Map sku:skuList) {
         String skuName = (String) sku.get("skuName");
-        if(sku.get("skuRemark") != null) {
+        if(sku.get("skuRemark") != null && !sku.get("skuRemark").equals("")) {
           skuName += sku.get("skuRemark");
         }
         printer.text(ScriptConstant.LEFT,skuName);
@@ -1498,9 +1498,9 @@ public class PrintModels {
                 new int[]{14, 9, 9},
                 new String[]{ScriptConstant.LEFT,ScriptConstant.LEFT,ScriptConstant.LEFT,},
                 new String[]{
-                        (String) sku.get("encoding"),
+                        (String) sku.get("encoding").equals("") ? "-" : "-",
                         String.valueOf(sku.get("orderAmount")) + sku.get("unitValue"),
-                        String.valueOf(sku.get("shipment")) + sku.get("unitValue")
+                        sku.get('showShipment') ? String.valueOf(sku.get("shipment")) : "-" + sku.get("unitValue")
                 }
         );
       }
