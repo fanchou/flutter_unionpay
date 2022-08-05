@@ -1498,9 +1498,9 @@ public class PrintModels {
                 new int[]{14, 9, 9},
                 new String[]{ScriptConstant.LEFT,ScriptConstant.LEFT,ScriptConstant.LEFT,},
                 new String[]{
-                  ((String) sku.get("encoding")).equals("") ? "-" : "-",
+                  "-",
                         String.valueOf(sku.get("orderAmount")) + sku.get("unitValue"),
-                  ((String) sku.get("showShipment")).equals("") ? String.valueOf(sku.get("shipment")) : "-" + sku.get("unitValue")
+                  (Boolean) sku.get("showShipment") ? String.valueOf(sku.get("shipment")) : "-" + sku.get("unitValue")
                 }
         );
       }
