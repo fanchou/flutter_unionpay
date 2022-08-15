@@ -3,6 +3,7 @@ package cn.fanchou.flutter_unionpay.utils;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.math.BigDecimal;
@@ -34,6 +35,8 @@ import cn.fanchou.flutter_unionpay.beans.order.OrderInfo;
 import cn.fanchou.flutter_unionpay.beans.order.PayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.order.RefundPayChannelListItem;
 import cn.fanchou.flutter_unionpay.beans.handing.PayInfo;
+import cn.fanchou.flutter_unionpay.beans.printData.OneLie;
+import cn.fanchou.flutter_unionpay.beans.printData.OneLie.TableBean;
 import cn.fanchou.flutter_unionpay.beans.store.StoreListItem;
 import cn.fanchou.flutter_unionpay.beans.summary.DamageGoodsListItem;
 import cn.fanchou.flutter_unionpay.beans.summary.GoodsDetails;
@@ -1506,6 +1509,60 @@ public class PrintModels {
       }
 
     }
+    return printer.getString();
+  }
+  public String printDataTemp(Map data) {
+    PrintScriptUtil printer = new PrintScriptUtil();
+    String info = (String) data.get("printInfoData");
+    List<OneLie> infoList = JSONArray.parseArray(info,OneLie.class);
+    if(infoList != null && infoList.size() > 0) {
+      String txt1 = null,txt2 = null;
+      for (OneLie item:infoList) {
+        String type = (String) item.getType();
+        List txtArr = item.getTxtArr();
+        if( txtArr != null && !txtArr.isEmpty()) {
+          txt1 = (String) txtArr.get(0);
+          if(txtArr.size() >=2) {
+            txt2 = (String) txtArr.get(1);
+          }
+        }
+        switch (type) {
+          //s,n,l：小，标准，大，默认标准字体
+          case "size":
+            txt1 = txt1.isEmpty() ? "n" : txt1;
+            txt2 = txt2.isEmpty() ? "n" : txt2;
+            printer.setNextFormat(txt1, txt2);
+            break;
+          case "txt":
+            txt1 = txt1.isEmpty() ? "测试" : txt1;
+            txt2 = txt2.isEmpty() ? "c" : txt2;
+            printer.text(txt2 , txt1);
+            break;
+          case "line":
+              printer.addLine();
+              break;
+          case "empty":
+            txt1 = txt1.isEmpty() ? "1" : txt1;
+            printer.emptyLines(Integer.parseInt(txt1));
+            break;
+          case "table":
+            TableBean tab = (TableBean) item.getTable();
+            int len = tab.getWidth().size();
+            int[] wArr = new int[len];
+            String[] aArr = new String[len], tArr = new String[len];
+            for (int i = 0; i < len; i++) {
+              wArr[i] = (int) tab.getWidth().get(i);
+              aArr[i] = (String) tab.getAlign().get(i);
+              tArr[i] = (String) tab.getTxt().get(i);
+            }
+            printer.printTable(wArr, aArr, tArr);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
     return printer.getString();
   }
 }

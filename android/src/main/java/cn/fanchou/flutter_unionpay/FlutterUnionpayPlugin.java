@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.alibaba.fastjson.JSON;
 import com.ums.AppHelper;
 import com.ums.anypay.service.IOnTransEndListener;
 import com.ums.upos.sdk.exception.CallServiceException;
@@ -18,6 +19,7 @@ import com.ums.upos.sdk.exception.SdkException;
 
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
@@ -124,6 +126,14 @@ public class FlutterUnionpayPlugin implements FlutterPlugin, MethodCallHandler, 
         int type = (int) call.argument("type");
         try {
           unionPayDevice.startPrint(type, printInfo);
+        } catch (ParseException e) {
+          e.printStackTrace();
+        }
+        break;
+      case "startPrintData":
+        Map data = (Map) call.argument("printInfoData");
+        try {
+          unionPayDevice.startPrintData(data);
         } catch (ParseException e) {
           e.printStackTrace();
         }

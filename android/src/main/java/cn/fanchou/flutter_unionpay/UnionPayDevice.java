@@ -9,6 +9,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.alibaba.fastjson.JSON;
 import com.ums.upos.sdk.exception.CallServiceException;
 import com.ums.upos.sdk.exception.SdkException;
 import com.ums.upos.sdk.printer.OnPrintResultListener;
@@ -21,6 +22,7 @@ import com.ums.upos.sdk.scanner.ScannerManager;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.fanchou.flutter_unionpay.utils.PrintModels;
@@ -247,6 +249,47 @@ public class UnionPayDevice {
         text = buildText();
     }
 
+    try {
+      manage.initPrinter();
+      manage.setPrnScript(text, "384");
+      manage.startPrint(new OnPrintResultListener() {
+        @Override
+        public void onPrintResult(int resCode) {//arg0具体可参考常量类ServiceResult
+          //打印完成主动登出，避免持续占用设备硬件
+//          params.put("code", "200");
+//          params.put("message", "打印完成！");
+//          uiThreadHandler.post(() -> result.success(params));
+
+          // todo 换成BasicMessageChannel的形式
+
+          if(resCode < 0) {
+            deviceServiceLogout();
+            deviceServiceLogin(activity);
+          }
+
+          Log.d("printInfo", "==============" + resCode);
+        }
+
+      });
+    } catch (CallServiceException e) {
+      e.printStackTrace();
+      deviceServiceLogout();
+      deviceServiceLogin(activity);
+    } catch (SdkException e) {
+      deviceServiceLogout();
+      deviceServiceLogin(activity);
+      e.printStackTrace();
+    }
+  }
+  /**
+   * 开始打印数据
+   **/
+  public void startPrintData(Map printInfoData) throws ParseException {
+    PrinterManager manage = new PrinterManager();
+    PrintModels model = new PrintModels();
+    Log.d("打印数据方法2222:", JSON.toJSONString(printInfoData));
+    String text;
+    text = model.printDataTemp(printInfoData);
     try {
       manage.initPrinter();
       manage.setPrnScript(text, "384");
