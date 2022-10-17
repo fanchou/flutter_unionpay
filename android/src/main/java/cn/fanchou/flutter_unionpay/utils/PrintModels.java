@@ -548,7 +548,9 @@ public class PrintModels {
     }
 
     printer
-      .text(ScriptConstant.CENTER, "*** #" + orderInfo.getDaySeq() + " 美团外卖 ***")
+      .setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE)
+      .text(ScriptConstant.CENTER, "* #" + orderInfo.getDaySeq() + " 美团外卖 *")
+      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
       .text(ScriptConstant.CENTER, "*" + orderInfo.getWmPoiName() + "*");
 
     printer.setNextFormat(ScriptConstant.NORMAL,ScriptConstant.NORMAL)
