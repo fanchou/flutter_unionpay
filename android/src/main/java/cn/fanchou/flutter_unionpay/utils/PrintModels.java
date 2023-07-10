@@ -119,9 +119,6 @@ public class PrintModels {
     return title;
   }
 
-
-
-
   /**
    * 订单打印
    **/
@@ -200,7 +197,11 @@ public class PrintModels {
         printer.addImage(ScriptConstant.CENTER, "320*188", imagePath);
         break;
       case "喜乳酪":
-        printer.addImage(ScriptConstant.CENTER, "283*123", imagePath);
+        if(storeId == 613) {
+          printer.addImage(ScriptConstant.CENTER, "280*120", imagePath);
+        } else {
+          printer.addImage(ScriptConstant.CENTER, "283*123", imagePath);
+        }
         break;
       case "茉司烘焙":
         printer.addImage(ScriptConstant.CENTER, "285*86", imagePath);
@@ -217,12 +218,19 @@ public class PrintModels {
       brandName = "面包新语";
     }
 
+    if(storeId != 613) {
+      printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE,"8","6")
+        .text(ScriptConstant.CENTER, orderInfo.getTradeBillType() == 1 ? brandName + "-" + orderInfo.getStoreName() : "(退)" + brandName + "-" + orderInfo.getStoreName())
+        .emptyLines(1)
+        .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+        .text(ScriptConstant.LEFT, "收银员：" + orderInfo.getOrderOperatorFullName());
+    } else {
+      printer.emptyLines(1)
+        .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
+        .text(ScriptConstant.LEFT, "收银员：" + orderInfo.getOrderOperatorFullName());
+    }
 
-    printer.setNextFormat(ScriptConstant.LARGE, ScriptConstant.LARGE,"8","6")
-      .text(ScriptConstant.CENTER, orderInfo.getTradeBillType() == 1 ? brandName + "-" + orderInfo.getStoreName() : "(退)" + brandName + "-" + orderInfo.getStoreName())
-      .emptyLines(1)
-      .setNextFormat(ScriptConstant.NORMAL, ScriptConstant.NORMAL)
-      .text(ScriptConstant.LEFT, "收银员：" + orderInfo.getOrderOperatorFullName());
+
 
     if (orderInfo.getTradeBillType() == 1) {
       printer.text(ScriptConstant.LEFT, "买单时间：" + orderInfo.getCreateTime());
