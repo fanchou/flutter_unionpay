@@ -167,8 +167,14 @@ public class PrintModels {
         brandName = "面包新语";
         imagePath = logoImages.get("BT");
       } else {
-        brandName = orderInfo.getBrandList().get(0).getName();
-        imagePath = logoImages.get(orderInfo.getBrandList().get(0).getNearbyStoreBrand());
+        if(storeId != 613) {
+          brandName = orderInfo.getBrandList().get(0).getName();
+          imagePath = logoImages.get(orderInfo.getBrandList().get(0).getNearbyStoreBrand());
+        }else {
+          brandName = "面包新语";
+          imagePath = logoImages.get("BT");
+        }
+
       }
     }
 
@@ -197,11 +203,7 @@ public class PrintModels {
         printer.addImage(ScriptConstant.CENTER, "320*188", imagePath);
         break;
       case "喜乳酪":
-        if(storeId == 613) {
-          printer.addImage(ScriptConstant.CENTER, "280*120", imagePath);
-        } else {
-          printer.addImage(ScriptConstant.CENTER, "283*123", imagePath);
-        }
+        printer.addImage(ScriptConstant.CENTER, "283*123", imagePath);
         break;
       case "茉司烘焙":
         printer.addImage(ScriptConstant.CENTER, "285*86", imagePath);
