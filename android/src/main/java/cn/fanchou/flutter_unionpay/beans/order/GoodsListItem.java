@@ -5,7 +5,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 public class GoodsListItem{
 
 	@JSONField(name="refundedNum")
-	private int refundedNum;
+	private double refundedNum;
 
 	@JSONField(name="orderId")
 	private String orderId;
@@ -61,11 +61,11 @@ public class GoodsListItem{
 	@JSONField(name="skuId")
 	private int skuId;
 
-	public void setRefundedNum(int refundedNum){
+	public void setRefundedNum(double refundedNum){
 		this.refundedNum = refundedNum;
 	}
 
-	public int getRefundedNum(){
+	public double getRefundedNum(){
 		return refundedNum;
 	}
 
